@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="112" fill="#1a1a2e"/>
+  <!-- moon glow -->
+  <circle cx="277" cy="235" r="192" fill="#2a2a4a" opacity="0.8"/>
+  <!-- moon crescent (masked by bg circle) -->
+  <circle cx="332" cy="203" r="149" fill="#1a1a2e"/>
+  <!-- owl face -->
+  <circle cx="171" cy="277" r="68" fill="#e8d5a3"/>
+  <circle cx="153" cy="268" r="15" fill="#1a1a2e"/>
+  <circle cx="189" cy="268" r="15" fill="#1a1a2e"/>
+  <circle cx="150" cy="264" r="5" fill="#fafaf8"/>
+  <circle cx="186" cy="264" r="5" fill="#fafaf8"/>
+  <!-- beak -->
+  <path d="M171 285 l-8 12 l16 0 Z" fill="#c4956a"/>
+</svg>
