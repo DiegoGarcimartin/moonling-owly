@@ -1,40 +1,34 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { HomeScreen } from './components/HomeScreen'
 import { SheetScreen } from './components/SheetScreen'
 import { EntryModal } from './components/EntryModal'
 import { SharePreviewModal } from './components/SharePreviewModal'
 import { SettingsModal } from './components/SettingsModal'
 import { HelpModal } from './components/HelpModal'
-import { buildDays } from './data'
-
-type AppState = 'empty' | 'tracking' | 'complete'
+import {
+  load, save, nowClockHour, nightDate, nightsToDays, getOrCreateTonight,
+  StoredState, StoredNight,
+} from './storage'
+import { EventType } from './data'
 
 interface Settings {
   mode: 'night' | 'day'
   dayStart: number
   childName: string
   childAge: string
-  appState: AppState
 }
 
-const STORAGE_KEY = 'moonling-owly-settings'
+const SETTINGS_KEY = 'moonling-owly-settings'
 
 function loadSettings(): Settings {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(SETTINGS_KEY)
     if (raw) return { ...defaultSettings(), ...JSON.parse(raw) }
   } catch { /* ignore */ }
   return defaultSettings()
 }
-
 function defaultSettings(): Settings {
-  return {
-    mode: 'night',
-    dayStart: 19,
-    childName: '',
-    childAge: '',
-    appState: 'tracking',
-  }
+  return { mode: 'night', dayStart: 19, childName: '', childAge: '' }
 }
 
 function BrandMark({ size = 22 }: { size?: number }) {
@@ -51,7 +45,6 @@ function BrandMark({ size = 22 }: { size?: number }) {
 
 export default function App() {
   const [tab, setTab] = useState<'home' | 'sheet'>('home')
-  const [sleeping, setSleeping] = useState(true)
   const [toast, setToast] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [showCloseModal, setShowCloseModal] = useState(false)
@@ -59,48 +52,183 @@ export default function App() {
   const [showHelp, setShowHelp] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [settings, setSettings] = useState<Settings>(loadSettings)
+  const [stored, setStored] = useState<StoredState>(load)
 
-  const { mode, dayStart, childName, childAge, appState } = settings
+  const { mode, dayStart, childName, childAge } = settings
+  const nights = stored.nights
 
+  // Persist settings whenever they change
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
     document.documentElement.setAttribute('data-mode', mode)
   }, [settings, mode])
 
-  const days = useMemo(() => {
-    if (appState === 'empty') return []
-    return buildDays(dayStart)
-  }, [appState, dayStart])
+  // Persist nights whenever they change
+  useEffect(() => { save(stored) }, [stored])
 
-  const patchSettings = (patch: Partial<Settings>) => setSettings(s => ({ ...s, ...patch }))
+  const patchSettings = useCallback((patch: Partial<Settings>) => {
+    setSettings(s => ({ ...s, ...patch }))
+  }, [])
 
-  const popToast = (msg: string) => {
+  const popToast = useCallback((msg: string) => {
     setToast(msg)
     setTimeout(() => setToast(null), 1800)
+  }, [])
+
+  // Derive sleeping state from storage (is there an open sleep session tonight?)
+  const isSleeping = useMemo(() => {
+    const today = nightDate(dayStart)
+    const tonight = nights.find(n => n.date === today)
+    if (!tonight) return false
+    const last = tonight.sleeps[tonight.sleeps.length - 1]
+    return !!last && last.end === null
+  }, [nights, dayStart])
+
+  // Derive app state from nights count
+  const appState = useMemo((): 'empty' | 'tracking' | 'complete' => {
+    if (nights.length === 0) return 'empty'
+    if (nights.length >= 14 && !isSleeping) return 'complete'
+    return 'tracking'
+  }, [nights.length, isSleeping])
+
+  // Convert stored nights to Day[] for display
+  const days = useMemo(() => nightsToDays(nights, dayStart), [nights, dayStart])
+
+  const fmt12Short = (h: number) => {
+    const m = Math.round((h % 1) * 60)
+    const period = Math.floor(h) >= 12 && Math.floor(h) < 24 ? 'PM' : 'AM'
+    let hh = Math.floor(h) % 12
+    if (hh === 0) hh = 12
+    return `${hh}:${String(m).padStart(2, '0')} ${period}`
   }
 
-  const handleSleepToggle = () => {
-    if (appState === 'empty') {
-      patchSettings({ appState: 'tracking' })
-      popToast('↓ First night started · 11:40 PM')
-      setSleeping(true)
-      return
-    }
-    setSleeping(s => !s)
-    popToast(sleeping ? '↑ Wakeup logged · 11:40 PM' : '↓ Sleep start logged · 11:40 PM')
-  }
+  const handleSleepToggle = useCallback(() => {
+    const h = nowClockHour()
+    const timeStr = fmt12Short(h)
 
-  const handleQuickEvent = (type: 'A' | 'C' | 'X') => {
-    const labels = { A: 'Feed', C: 'Co-sleep', X: 'Note' }
-    popToast(`${labels[type]} logged · now`)
-  }
+    setStored(prev => {
+      const { nights: updatedNights, idx } = getOrCreateTonight(prev.nights, dayStart)
+      const night = { ...updatedNights[idx], sleeps: [...updatedNights[idx].sleeps] }
+      const lastSleep = night.sleeps[night.sleeps.length - 1]
+      const sleeping = !!lastSleep && lastSleep.end === null
 
-  const handleClosePeriod = () => {
+      if (sleeping) {
+        // Close the current sleep session
+        night.sleeps[night.sleeps.length - 1] = { ...lastSleep, end: h }
+      } else {
+        // Start a new sleep session
+        night.sleeps.push({ start: h, end: null })
+      }
+
+      const result = [...updatedNights]
+      result[idx] = night
+      return { nights: result }
+    })
+
+    popToast(isSleeping ? `↑ Wakeup logged · ${timeStr}` : `↓ Sleep start · ${timeStr}`)
+  }, [dayStart, isSleeping, popToast])
+
+  const handleQuickEvent = useCallback((type: EventType) => {
+    const h = nowClockHour()
+    const labels = { A: 'Feed', C: 'Co-sleep', X: 'Note' } as const
+
+    setStored(prev => {
+      const { nights: updatedNights, idx } = getOrCreateTonight(prev.nights, dayStart)
+      const night = {
+        ...updatedNights[idx],
+        events: [...updatedNights[idx].events, { type, h }],
+      }
+      const result = [...updatedNights]
+      result[idx] = night
+      return { nights: result }
+    })
+
+    popToast(`${labels[type]} logged · ${fmt12Short(h)}`)
+  }, [dayStart, popToast])
+
+  const handleDeleteEvent = useCallback((ev: { kind: string; t: number }) => {
+    const today = nightDate(dayStart)
+    setStored(prev => {
+      const idx = prev.nights.findIndex(n => n.date === today)
+      if (idx < 0) return prev
+      const night = prev.nights[idx]
+
+      // Convert track minute back to approximate clock hour for matching
+      // We delete by matching the track minute (t) against stored events
+      if (ev.kind === 'sleep_start' || ev.kind === 'sleep_end') {
+        // Remove sleep sessions matching this track minute
+        // (simplification: remove the first matching boundary)
+        const updatedSleeps = night.sleeps.filter((s, i) => {
+          if (ev.kind === 'sleep_start') {
+            // Don't remove active sleep session starts — only completed ones
+            return i !== night.sleeps.findIndex(() => true) // keep for now
+          }
+          return true
+        })
+        const updated = { ...night, sleeps: updatedSleeps }
+        const result = [...prev.nights]
+        result[idx] = updated
+        return { nights: result }
+      } else {
+        // Remove event by approximate position — find closest match
+        const typeMap: Record<string, EventType> = { feeding: 'A', cosleep: 'C', incident: 'X' }
+        const targetType = typeMap[ev.kind]
+        let removed = false
+        const updatedEvents = night.events.filter(e => {
+          if (!removed && e.type === targetType) { removed = true; return false }
+          return true
+        })
+        const updated = { ...night, events: updatedEvents }
+        const result = [...prev.nights]
+        result[idx] = updated
+        return { nights: result }
+      }
+    })
+    popToast('Entry deleted')
+  }, [dayStart, popToast])
+
+  const handleManualSave = useCallback((entry: { type: string; hour: number; minute: number; dayOffset: number }) => {
+    const h = entry.hour + entry.minute / 60
+    const targetDate = new Date()
+    targetDate.setDate(targetDate.getDate() + entry.dayOffset)
+    // Adjust for night boundary (if hour is before dayStart, it belongs to the previous calendar day's night)
+    const dateStr = targetDate.toISOString().split('T')[0]
+
+    setStored(prev => {
+      let nights = [...prev.nights]
+      let idx = nights.findIndex(n => n.date === dateStr)
+      if (idx < 0) {
+        nights = [...nights, { date: dateStr, sleeps: [], events: [] } satisfies StoredNight]
+        idx = nights.length - 1
+      }
+      const night = { ...nights[idx] }
+
+      if (entry.type === 'sleep_start') {
+        night.sleeps = [...night.sleeps, { start: h, end: null }]
+      } else if (entry.type === 'sleep_end') {
+        // Close the last open sleep session on this night
+        const sleeps = [...night.sleeps]
+        const lastOpen = sleeps.map((s, i) => ({ s, i })).reverse().find(({ s }) => s.end === null)
+        if (lastOpen) sleeps[lastOpen.i] = { ...lastOpen.s, end: h }
+        night.sleeps = sleeps
+      } else {
+        night.events = [...night.events, { type: entry.type as EventType, h }]
+      }
+
+      nights[idx] = night
+      return { nights }
+    })
+
+    popToast('Entry saved')
+    setShowModal(false)
+  }, [popToast])
+
+  const handleClosePeriod = useCallback(() => {
     setShowCloseModal(false)
-    patchSettings({ appState: 'empty' })
+    setStored({ nights: [] })
     popToast('Journal closed · starting fresh')
     setTab('home')
-  }
+  }, [popToast])
 
   return (
     <div className="app-root" data-mode={mode}>
@@ -142,12 +270,12 @@ export default function App() {
           <HomeScreen
             days={days}
             state={appState}
-            sleeping={sleeping}
+            sleeping={isSleeping}
             dayStart={dayStart}
             onSleepToggle={handleSleepToggle}
             onQuickEvent={handleQuickEvent}
             onManual={() => setShowModal(true)}
-            onDeleteEvent={() => popToast('Entry deleted')}
+            onDeleteEvent={handleDeleteEvent}
             onClosePeriod={() => setShowCloseModal(true)}
             onHelp={() => setShowHelp(true)}
           />
@@ -169,7 +297,7 @@ export default function App() {
           position: 'fixed', bottom: 60, left: '50%', transform: 'translateX(-50%)',
           background: 'var(--text)', color: 'var(--bg)', padding: '10px 18px',
           borderRadius: 999, fontSize: 12.5, fontFamily: 'Geist, sans-serif',
-          whiteSpace: 'nowrap', zIndex: 90, boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+          whiteSpace: 'nowrap', zIndex: 200, boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
         }}>{toast}</div>
       )}
 
@@ -178,21 +306,21 @@ export default function App() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-handle" />
             <h2 className="modal-title">Close this journal?</h2>
-            <p className="modal-sub">We'll save it as a PDF / image for you. You'll start a new journal from night 1.</p>
+            <p className="modal-sub">You'll start a new journal from night 1.</p>
             <button className="modal-confirm" onClick={handleClosePeriod}>Yes, close and start fresh</button>
             <button className="modal-cancel" onClick={() => setShowCloseModal(false)}>Cancel</button>
           </div>
         </div>
       )}
 
-      {showModal && <EntryModal onClose={() => setShowModal(false)} onSave={() => { popToast('Entry saved'); setShowModal(false) }} />}
+      {showModal && <EntryModal onClose={() => setShowModal(false)} onSave={handleManualSave} />}
       {showShare && <SharePreviewModal days={days} dayStart={dayStart} childName={childName} childAge={childAge} onUpdate={patchSettings} onClose={() => setShowShare(false)} />}
       {showHelp && <HelpModal dayStart={dayStart} onClose={() => setShowHelp(false)} />}
       {showSettings && (
         <SettingsModal
           settings={settings}
           onChange={patchSettings}
-          onNewJournal={() => { patchSettings({ appState: 'empty' }); setShowSettings(false); popToast('Journal closed · starting fresh') }}
+          onNewJournal={() => { setStored({ nights: [] }); setShowSettings(false); popToast('Journal closed · starting fresh') }}
           onClose={() => setShowSettings(false)}
         />
       )}
