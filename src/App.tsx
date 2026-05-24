@@ -9,7 +9,7 @@ import {
   load, save, nowClockHour, nightDate, nightsToDays, getOrCreateTonight,
   StoredState, StoredNight,
 } from './storage'
-import { EventType } from './data'
+import { EventType, clockToTrack } from './data'
 
 interface Settings {
   mode: 'night' | 'day'
@@ -152,37 +152,35 @@ export default function App() {
       const idx = prev.nights.findIndex(n => n.date === today)
       if (idx < 0) return prev
       const night = prev.nights[idx]
+      let updatedNight = { ...night }
 
-      // Convert track minute back to approximate clock hour for matching
-      // We delete by matching the track minute (t) against stored events
-      if (ev.kind === 'sleep_start' || ev.kind === 'sleep_end') {
-        // Remove sleep sessions matching this track minute
-        // (simplification: remove the first matching boundary)
-        const updatedSleeps = night.sleeps.filter((s, i) => {
-          if (ev.kind === 'sleep_start') {
-            // Don't remove active sleep session starts — only completed ones
-            return i !== night.sleeps.findIndex(() => true) // keep for now
-          }
-          return true
-        })
-        const updated = { ...night, sleeps: updatedSleeps }
-        const result = [...prev.nights]
-        result[idx] = updated
-        return { nights: result }
+      if (ev.kind === 'sleep_start') {
+        // Remove the whole session whose start matches this track minute
+        updatedNight.sleeps = night.sleeps.filter(
+          s => Math.round(clockToTrack(s.start, dayStart)) !== Math.round(ev.t)
+        )
+      } else if (ev.kind === 'sleep_end') {
+        // Reopen the session whose end matches (user tapped wakeup by mistake)
+        updatedNight.sleeps = night.sleeps.map(s =>
+          s.end !== null && Math.round(clockToTrack(s.end, dayStart)) === Math.round(ev.t)
+            ? { ...s, end: null }
+            : s
+        )
       } else {
-        // Remove event by approximate position — find closest match
         const typeMap: Record<string, EventType> = { feeding: 'A', cosleep: 'C', incident: 'X' }
         const targetType = typeMap[ev.kind]
         let removed = false
-        const updatedEvents = night.events.filter(e => {
-          if (!removed && e.type === targetType) { removed = true; return false }
+        updatedNight.events = night.events.filter(e => {
+          if (!removed && e.type === targetType && Math.round(clockToTrack(e.h, dayStart)) === Math.round(ev.t)) {
+            removed = true; return false
+          }
           return true
         })
-        const updated = { ...night, events: updatedEvents }
-        const result = [...prev.nights]
-        result[idx] = updated
-        return { nights: result }
       }
+
+      const result = [...prev.nights]
+      result[idx] = updatedNight
+      return { nights: result }
     })
     popToast('Entry deleted')
   }, [dayStart, popToast])
@@ -191,7 +189,8 @@ export default function App() {
     const h = entry.hour + entry.minute / 60
     const targetDate = new Date()
     targetDate.setDate(targetDate.getDate() + entry.dayOffset)
-    // Adjust for night boundary (if hour is before dayStart, it belongs to the previous calendar day's night)
+    // If hour is before dayStart, this belongs to the night that started the previous calendar day
+    if (entry.hour < dayStart) targetDate.setDate(targetDate.getDate() - 1)
     const dateStr = targetDate.toISOString().split('T')[0]
 
     setStored(prev => {

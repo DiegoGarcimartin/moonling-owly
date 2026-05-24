@@ -28,9 +28,19 @@ export function EntryModal({ onClose, onSave }: EntryModalProps) {
     setMinute(total % 60)
   }
 
-  const setNow = () => { setHour(23); setMinute(40) }
+  const setNow = () => {
+    const d = new Date()
+    setHour(d.getHours())
+    setMinute(Math.floor(d.getMinutes() / 5) * 5)
+  }
 
-  const dayLabels = ['Fri 15', 'Sat 16', 'Sun 17', 'Mon 18', 'Tue 19', 'Wed 20', 'Today']
+  const now = new Date()
+  const dayLabels = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(now)
+    d.setDate(d.getDate() + (i - 6))
+    const dow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]
+    return i === 6 ? `Today ${d.getDate()}` : `${dow} ${d.getDate()}`
+  })
 
   return (
     <div className="modal-back" onClick={(e) => { if ((e.target as HTMLElement).classList.contains('modal-back')) onClose() }}>
