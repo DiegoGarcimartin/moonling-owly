@@ -6,6 +6,7 @@ import { EventType, Day, clockToTrack } from './data'
 export interface StoredEvent {
   type: EventType
   h: number // decimal clock hour, e.g. 23.5 = 11:30 PM
+  note?: string
 }
 
 export interface StoredSleep {
@@ -79,6 +80,7 @@ export function nightsToDays(nights: StoredNight[], dayStart: number): Day[] {
       events: n.events.map(e => ({
         type: e.type,
         t: clockToTrack(e.h, dayStart),
+        ...(e.note ? { note: e.note } : {}),
       })),
       inProgress,
     } satisfies Day

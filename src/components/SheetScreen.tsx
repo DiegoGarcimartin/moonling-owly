@@ -88,6 +88,27 @@ export function SheetScreen({ days, state, dayStart, childName, onClosePeriod, o
         </div>
       </div>
 
+      {/* Notas de todos los días */}
+      {(() => {
+        const notes = days.flatMap((d, i) =>
+          (d.events || [])
+            .filter(ev => ev.note)
+            .map(ev => ({ dayNum: i + 1, date: fmtDate(d.date), note: ev.note! }))
+        )
+        if (!notes.length) return null
+        return (
+          <div className="notes-section">
+            <div className="notes-title">Notas</div>
+            {notes.map((n, i) => (
+              <div className="note-row" key={i}>
+                <span className="note-meta mono">noche {n.dayNum} · {n.date}</span>
+                <span className="note-text">{n.note}</span>
+              </div>
+            ))}
+          </div>
+        )
+      })()}
+
       <div className="diario-share">
         <div className="diario-share-head">
           <div className="diario-share-eyebrow">para tu pediatra</div>

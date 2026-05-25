@@ -28,10 +28,10 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
     return (
       <div className="screen-inner">
         <div className="empty-hero">
-          <div className="empty-eyebrow">Día 0 · {todayLabel}</div>
-          <h1 className="empty-title">Empezamos<br /><em className="serif-italic">esta noche</em>.</h1>
+          <div className="empty-eyebrow">{todayLabel}</div>
+          <h1 className="empty-title">Empieza<br /><em className="serif-italic">cuando quieras</em>.</h1>
           <p className="empty-sub">
-            Pulsa el botón cuando pongas al bebé a dormir.
+            Pulsa el botón la primera vez que pongas al bebé a dormir.
             En 14 noches tendrás un diario listo para tu pediatra.
           </p>
         </div>
@@ -76,7 +76,7 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
   const nowClock = fmtTrackMin(nowTrack, dayStart)
   const minToPct = (m: number) => m / 1440 * 100
 
-  type EventListItem = { kind: string; t: number; label: string }
+  type EventListItem = { kind: string; t: number; label: string; note?: string }
   const eventList: EventListItem[] = []
   for (const [s, e] of today.sleeps || []) {
     eventList.push({ kind: 'sleep_start', t: s, label: 'Inicio de sueño' })
@@ -84,7 +84,7 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
   }
   for (const ev of today.events || []) {
     const labels = { A: 'Toma', C: 'Colecho', X: 'Nota' }
-    eventList.push({ kind: ev.type === 'A' ? 'feeding' : ev.type === 'C' ? 'cosleep' : 'incident', t: ev.t, label: labels[ev.type] })
+    eventList.push({ kind: ev.type === 'A' ? 'feeding' : ev.type === 'C' ? 'cosleep' : 'incident', t: ev.t, label: labels[ev.type], note: ev.note })
   }
   eventList.sort((a, b) => a.t - b.t)
   eventList.reverse()
@@ -121,7 +121,6 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
         <div className="primary-cta-r">
           <div className="primary-cta-arrow">{sleeping ? '↑' : '↓'}</div>
           <div>ahora</div>
-          <div>{nowClock}</div>
         </div>
       </button>
 
@@ -148,7 +147,7 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
       <div className="strip">
         <div className="strip-head">
           <span className="strip-title">Esta noche</span>
-          <span className="strip-now mono">en curso · {nowClock}</span>
+          <span className="strip-now mono">en curso</span>
         </div>
         <div className="strip-grid">
           {HOURS_ARR.map((_, i) =>
@@ -199,7 +198,10 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
                 <div className="event-row" key={i}>
                   <span className="event-time mono">{fmtTrackMin(ev.t, dayStart)}</span>
                   <span className={`event-glyph-sm ${ev.kind}`}><Icon name={iconName} size={12} stroke={2.2}/></span>
-                  <span className="event-label">{ev.label}</span>
+                  <span className="event-label">
+                    {ev.label}
+                    {ev.note && <span className="event-note">{ev.note}</span>}
+                  </span>
                   <button className="event-del" onClick={() => onDeleteEvent(ev)}>×</button>
                 </div>
               )

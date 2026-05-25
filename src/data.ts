@@ -7,6 +7,7 @@ export type EventType = 'A' | 'C' | 'X'
 export interface DayEvent {
   type: EventType
   t: number // track minutes
+  note?: string
 }
 
 export interface Day {

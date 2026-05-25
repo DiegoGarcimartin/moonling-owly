@@ -9,18 +9,20 @@ interface SharePreviewModalProps {
   dayStart: number
   childName: string
   childAge: string
-  onUpdate: (patch: { childName?: string; childAge?: string }) => void
   onClose: () => void
 }
 
-export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdate, onClose }: SharePreviewModalProps) {
+export function SharePreviewModal({ days, dayStart, childName, childAge, onClose }: SharePreviewModalProps) {
   const scalerRef = useRef<HTMLDivElement>(null)
   const docRef = useRef<HTMLDivElement>(null)
   const [capturing, setCapturing] = useState(false)
 
   const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
+  const firstDate = days.length ? new Date(days[0].date) : new Date()
   const lastDate = days.length ? new Date(days[days.length - 1].date) : new Date()
-  const dateLabel = `${lastDate.getUTCDate()} ${MESES[lastDate.getUTCMonth()]} ${lastDate.getUTCFullYear()}`
+  const dateRange = days.length > 1
+    ? `${firstDate.getUTCDate()} ${MESES[firstDate.getUTCMonth()]} – ${lastDate.getUTCDate()} ${MESES[lastDate.getUTCMonth()]} ${lastDate.getUTCFullYear()}`
+    : `${lastDate.getUTCDate()} ${MESES[lastDate.getUTCMonth()]} ${lastDate.getUTCFullYear()}`
 
   useEffect(() => {
     const update = () => {
@@ -57,17 +59,14 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
     setCapturing(true)
 
     try {
-      // Ensure web fonts are fully loaded before capture
       await document.fonts.ready
 
-      // Clone at natural size off-screen so the visible element is untouched
       const clone = doc.cloneNode(true) as HTMLElement
       clone.style.transform = 'none'
       clone.style.width = '880px'
       clone.style.position = 'fixed'
       clone.style.top = '-9999px'
       clone.style.left = '0'
-      clone.style.borderRadius = '12px'
       document.body.appendChild(clone)
 
       const bgColor = getComputedStyle(doc).backgroundColor
@@ -90,7 +89,6 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: childName ? `${childName} — diario de sueño` : 'Diario de sueño' })
       } else {
-        // Desktop or browsers without file share: download the image
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
@@ -99,7 +97,7 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
         URL.revokeObjectURL(url)
       }
     } catch {
-      // User cancelled share or capture failed silently
+      // User cancelled or capture failed
     } finally {
       setCapturing(false)
     }
@@ -112,7 +110,7 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
         <div className="share-preview-head">
           <div style={{ flex: 1, minWidth: 0 }}>
             <h2 className="modal-title">Compartir diario</h2>
-            <p className="modal-sub">Toca un campo para rellenarlo antes de compartir.</p>
+            <p className="modal-sub">Vista previa de la imagen que se compartirá.</p>
           </div>
           <button className="iconbtn" onClick={onClose} aria-label="Cerrar" style={{ flexShrink: 0 }}>
             <Icon name="close" size={16}/>
@@ -121,39 +119,51 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
 
         <div className="doc-scaler" ref={scalerRef}>
           <div className="doc" id="printable-doc" ref={docRef}>
-            <div className="doc-head">
-              <div className="doc-brand">
-                <div className="doc-brand-name">Moonling <em>Owly</em></div>
-                <div className="doc-brand-sub mono">diario de sueño · {days.length} {days.length === 1 ? 'noche' : 'noches'}</div>
-              </div>
-              <div className="doc-meta">
-                <div className="doc-meta-row">
-                  <span>Nombre</span>
-                  <input className="doc-fillin" type="text" value={childName} onChange={(e) => onUpdate({ childName: e.target.value })} placeholder="Toca para rellenar" aria-label="Nombre del bebé" />
-                </div>
-                <div className="doc-meta-row">
-                  <span>Edad</span>
-                  <input className="doc-fillin short" type="text" value={childAge} onChange={(e) => onUpdate({ childAge: e.target.value })} placeholder="ej. 11 m" aria-label="Edad del bebé" />
-                </div>
-                <div className="doc-meta-row"><span>Fecha</span><b>{dateLabel}</b></div>
-                <div className="doc-meta-row"><span>Inicio noche</span><b className="mono">{fmt12(dayStart, 0)}</b></div>
+
+            {/* Header: brand mark + meta */}
+            <div className="doc-top">
+              <div className="doc-top-brand">Moonling <em>Owly</em></div>
+              <div className="doc-top-meta mono">{dateRange} · {fmt12(dayStart, 0)}</div>
+            </div>
+
+            {/* Hero: child name as emotional center */}
+            <div className="doc-hero">
+              {childName
+                ? <div className="doc-hero-name">{childName}</div>
+                : <div className="doc-hero-name doc-hero-name--empty">diario de sueño</div>
+              }
+              <div className="doc-hero-sub">
+                {[childAge, `${days.length} ${days.length === 1 ? 'noche' : 'noches'}`].filter(Boolean).join(' · ')}
               </div>
             </div>
+
+            {/* Divider */}
+            <div className="doc-rule" />
+
+            {/* Sleep grid */}
             <div className="doc-grid">
               <SheetGrid days={days} dayStart={dayStart} print={true} />
             </div>
+
+            {/* Divider */}
+            <div className="doc-rule" style={{ marginTop: 10 }} />
+
+            {/* Legend */}
             <div className="doc-legend">
-              <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↓</span></span>inicio sueño</span>
+              <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↓</span></span>inicio</span>
               <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↑</span></span>despertar</span>
               <span className="doc-legend-item"><span className="doc-legend-glyph asleep"></span>dormido</span>
               <span className="doc-legend-item"><span className="doc-legend-glyph feed"><Icon name="feed" size={10} stroke={2.4}/></span>toma</span>
               <span className="doc-legend-item"><span className="doc-legend-glyph co"><Icon name="cosleep" size={10} stroke={2.4}/></span>colecho</span>
               <span className="doc-legend-item"><span className="doc-legend-glyph note"><Icon name="note" size={10} stroke={2.4}/></span>nota</span>
             </div>
+
+            {/* Footer */}
             <div className="doc-footer">
-              <span>moonling owly</span>
-              <span>página 1 / 1</span>
+              <span className="serif-italic">moonling owly</span>
+              <span>moonlingowly.com</span>
             </div>
+
           </div>
         </div>
 

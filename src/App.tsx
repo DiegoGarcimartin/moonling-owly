@@ -210,7 +210,7 @@ export default function App() {
     popToast('Entrada eliminada')
   }, [stored.nights, dayStart, popToast, user])
 
-  const handleManualSave = useCallback((entry: { type: string; hour: number; minute: number; dayOffset: number }) => {
+  const handleManualSave = useCallback((entry: { type: string; hour: number; minute: number; dayOffset: number; note?: string }) => {
     const h = entry.hour + entry.minute / 60
     const targetDate = new Date()
     targetDate.setDate(targetDate.getDate() + entry.dayOffset)
@@ -233,7 +233,7 @@ export default function App() {
       if (lastOpen) sleeps[lastOpen.i] = { ...lastOpen.s, end: h }
       night.sleeps = sleeps
     } else {
-      night.events = [...night.events, { type: entry.type as EventType, h }]
+      night.events = [...night.events, { type: entry.type as EventType, h, ...(entry.note ? { note: entry.note } : {}) }]
     }
 
     nightsCopy[idx] = night
@@ -372,7 +372,7 @@ export default function App() {
       )}
 
       {showModal && <EntryModal onClose={() => setShowModal(false)} onSave={handleManualSave} />}
-      {showShare && <SharePreviewModal days={days} dayStart={dayStart} childName={childName} childAge={childAge} onUpdate={patchSettings} onClose={() => setShowShare(false)} />}
+      {showShare && <SharePreviewModal days={days} dayStart={dayStart} childName={childName} childAge={childAge} onClose={() => setShowShare(false)} />}
       {showHelp && <HelpModal dayStart={dayStart} onClose={() => setShowHelp(false)} />}
       {showSettings && (
         <SettingsModal

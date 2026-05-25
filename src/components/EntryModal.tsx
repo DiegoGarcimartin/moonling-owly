@@ -4,7 +4,7 @@ import { fmt12 } from '../data'
 
 interface EntryModalProps {
   onClose: () => void
-  onSave: (entry: { type: string; hour: number; minute: number; dayOffset: number }) => void
+  onSave: (entry: { type: string; hour: number; minute: number; dayOffset: number; note?: string }) => void
 }
 
 export function EntryModal({ onClose, onSave }: EntryModalProps) {
@@ -12,6 +12,7 @@ export function EntryModal({ onClose, onSave }: EntryModalProps) {
   const [hour, setHour] = useState(22)
   const [minute, setMinute] = useState(0)
   const [dayOffset, setDayOffset] = useState(0)
+  const [note, setNote] = useState('')
 
   const types = [
     { id: 'sleep_start', label: 'Inicio sueño', icon: 'sleep-start', cls: 'sleep-start' },
@@ -20,6 +21,8 @@ export function EntryModal({ onClose, onSave }: EntryModalProps) {
     { id: 'C',           label: 'Colecho',      icon: 'cosleep',     cls: 'cosleep' },
     { id: 'X',           label: 'Nota',         icon: 'note',        cls: 'incident' },
   ]
+
+  const isEvent = ['A', 'C', 'X'].includes(type)
 
   const step = (deltaMin: number) => {
     let total = hour * 60 + minute + deltaMin
@@ -95,7 +98,22 @@ export function EntryModal({ onClose, onSave }: EntryModalProps) {
           </div>
         </div>
 
-        <button className="modal-confirm" onClick={() => onSave({ type, hour, minute, dayOffset })}>Guardar</button>
+        {isEvent && (
+          <div className="entry-note-wrap">
+            <textarea
+              className="entry-note"
+              placeholder={type === 'X' ? 'Qué pasó…' : 'Nota opcional…'}
+              value={note}
+              onChange={e => setNote(e.target.value.slice(0, 140))}
+              rows={2}
+            />
+            {note.length > 80 && (
+              <span className="entry-note-count mono">{note.length}/140</span>
+            )}
+          </div>
+        )}
+
+        <button className="modal-confirm" onClick={() => onSave({ type, hour, minute, dayOffset, note: note.trim() || undefined })}>Guardar</button>
         <button className="modal-cancel" onClick={onClose}>Cancelar</button>
       </div>
     </div>
