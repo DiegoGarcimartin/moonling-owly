@@ -7,6 +7,7 @@ import { SharePreviewModal } from './components/SharePreviewModal'
 import { SettingsModal } from './components/SettingsModal'
 import { HelpModal } from './components/HelpModal'
 import { AuthScreen } from './components/AuthScreen'
+import { OnboardingScreen } from './components/OnboardingScreen'
 import { auth } from './lib/firebase'
 import { loadAllNights, syncNight, deleteAllNights, mergeNights } from './lib/sync'
 import {
@@ -20,6 +21,7 @@ interface Settings {
   dayStart: number
   childName: string
   childAge: string
+  onboardingDone: boolean
 }
 
 const SETTINGS_KEY = 'moonling-owly-settings'
@@ -27,12 +29,16 @@ const SETTINGS_KEY = 'moonling-owly-settings'
 function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY)
-    if (raw) return { ...defaultSettings(), ...JSON.parse(raw) }
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      // Existing users who already have a name skip onboarding
+      return { ...defaultSettings(), ...parsed, onboardingDone: parsed.onboardingDone ?? !!parsed.childName }
+    }
   } catch { /* ignore */ }
   return defaultSettings()
 }
 function defaultSettings(): Settings {
-  return { mode: 'night', dayStart: 19, childName: '', childAge: '' }
+  return { mode: 'night', dayStart: 19, childName: '', childAge: '', onboardingDone: false }
 }
 
 function BrandMark({ size = 22 }: { size?: number }) {
@@ -266,6 +272,18 @@ export default function App() {
     return (
       <div className="app-root" data-mode={mode}>
         <AuthScreen />
+      </div>
+    )
+  }
+
+  if (!settings.onboardingDone) {
+    return (
+      <div className="app-root" data-mode={mode}>
+        <OnboardingScreen
+          onDone={(childName, childAge) =>
+            patchSettings({ childName, childAge, onboardingDone: true })
+          }
+        />
       </div>
     )
   }
