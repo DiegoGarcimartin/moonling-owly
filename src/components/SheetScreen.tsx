@@ -44,6 +44,13 @@ export function SheetScreen({ days, state, dayStart, childName, onClosePeriod, o
   const avgNight = days.reduce((s, d) => s + nightSleepHours(d, dayStart), 0) / totalNights
   const totalWakeups = days.reduce((s, d) => s + nightWakeups(d), 0)
 
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+  const fmtDate = (iso: string) => { const d = new Date(iso); return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}` }
+  const firstDate = days[0].date
+  const lastDate = days[totalNights - 1].date
+  const dateRange = firstDate === lastDate ? fmtDate(firstDate) : `${fmtDate(firstDate)} — ${fmtDate(lastDate)}`
+  const year = new Date(lastDate).getUTCFullYear()
+
   return (
     <div className="screen-inner">
       <div className="sheet-head">
@@ -56,7 +63,7 @@ export function SheetScreen({ days, state, dayStart, childName, onClosePeriod, o
         <h1 className="sheet-title">My sleep<br /><em className="serif-italic">journal</em></h1>
         <div className="sheet-meta">
           {childName && <span>for <b>{childName}</b></span>}
-          <span><b>May 7 — 20</b>, 2026</span>
+          <span><b>{dateRange}</b>, {year}</span>
           <span><b>{totalNights}</b> night{totalNights === 1 ? '' : 's'}</span>
         </div>
       </div>

@@ -12,6 +12,7 @@ export interface DayEvent {
 export interface Day {
   d: string
   label: string
+  date: string // YYYY-MM-DD
   sleeps: [number, number][] // track minutes
   events: DayEvent[]
   inProgress?: boolean
@@ -76,6 +77,7 @@ export function buildDays(dayStart = 19): Day[] {
   return SAMPLE_RAW.map(raw => ({
     d: raw.d,
     label: raw.label,
+    date: `2026-05-${raw.d}`,
     inProgress: raw.inProgress,
     sleeps: raw.sleeps.map(([s, e]) => {
       let ts = clockToTrack(s, dayStart)

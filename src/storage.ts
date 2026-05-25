@@ -73,6 +73,7 @@ export function nightsToDays(nights: StoredNight[], dayStart: number): Day[] {
     return {
       d: dayNum,
       label,
+      date: n.date,
       sleeps,
       events: n.events.map(e => ({
         type: e.type,
