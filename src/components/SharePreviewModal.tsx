@@ -16,6 +16,10 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
   const scalerRef = useRef<HTMLDivElement>(null)
   const docRef = useRef<HTMLDivElement>(null)
 
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+  const lastDate = days.length ? new Date(days[days.length - 1].date) : new Date()
+  const dateLabel = `${lastDate.getUTCDate()} ${MONTHS[lastDate.getUTCMonth()]} ${lastDate.getUTCFullYear()}`
+
   useEffect(() => {
     const update = () => {
       const scaler = scalerRef.current
@@ -77,7 +81,7 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
             <div className="doc-head">
               <div className="doc-brand">
                 <div className="doc-brand-name">Moonling Owly</div>
-                <div className="doc-brand-sub mono">sleep self-report · 14 nights</div>
+                <div className="doc-brand-sub mono">sleep self-report · {days.length} night{days.length === 1 ? '' : 's'}</div>
               </div>
               <div className="doc-meta">
                 <div className="doc-meta-row">
@@ -88,7 +92,7 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
                   <span>Age</span>
                   <input className="doc-fillin short" type="text" value={childAge} onChange={(e) => onUpdate({ childAge: e.target.value })} placeholder="e.g. 11 m" aria-label="Child age" />
                 </div>
-                <div className="doc-meta-row"><span>Date</span><b>20 May 2026</b></div>
+                <div className="doc-meta-row"><span>Date</span><b>{dateLabel}</b></div>
                 <div className="doc-meta-row"><span>Day starts</span><b className="mono">{fmt12(dayStart, 0)}</b></div>
               </div>
             </div>
