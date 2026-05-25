@@ -1,5 +1,6 @@
 import { Icon } from './Icon'
 import { Day, getHours, fmtTrackMin, clockToTrack, fmt12 } from '../data'
+import { nowClockHour } from '../storage'
 
 interface HomeScreenProps {
   days: Day[]
@@ -18,13 +19,15 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
   const today = days && days.length ? days[days.length - 1] : null
   const HOURS_ARR = getHours(dayStart)
   const dayStartLabel = fmt12(dayStart, 0)
-  const dayEndLabel = fmt12(dayStart, 0)
+
+  const todayDate = new Date()
+  const todayLabel = `${todayDate.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][todayDate.getMonth()]}`
 
   if (state === 'empty' || !today) {
     return (
       <div className="screen-inner">
         <div className="empty-hero">
-          <div className="empty-eyebrow">Day 0 · 20 May</div>
+          <div className="empty-eyebrow">Day 0 · {todayLabel}</div>
           <h1 className="empty-title">We start<br /><em className="serif-italic">tonight</em>.</h1>
           <p className="empty-sub">
             Tap the button when you put the baby to sleep.
@@ -67,7 +70,7 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
 
   const nowTrack = (() => {
     if (today.sleeps && today.sleeps.length) return today.sleeps[today.sleeps.length - 1][1]
-    return clockToTrack(22, dayStart)
+    return clockToTrack(nowClockHour(), dayStart)
   })()
   const nowClock = fmtTrackMin(nowTrack, dayStart)
   const minToPct = (m: number) => m / 1440 * 100
@@ -143,7 +146,7 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
 
       <div className="strip">
         <div className="strip-head">
-          <span className="strip-title">Tonight <span className="strip-range mono">· {dayStartLabel} → {dayEndLabel}</span></span>
+          <span className="strip-title">Tonight <span className="strip-range mono">· {dayStartLabel} → {dayStartLabel} +1</span></span>
           <span className="strip-now mono">ONGOING · {nowClock}</span>
         </div>
         <div className="strip-grid">
