@@ -125,12 +125,12 @@ export default function App() {
       return { nights: result }
     })
 
-    popToast(isSleeping ? `↑ Wakeup logged · ${timeStr}` : `↓ Sleep start · ${timeStr}`)
+    popToast(isSleeping ? `↑ Despertar · ${timeStr}` : `↓ Inicio de sueño · ${timeStr}`)
   }, [dayStart, isSleeping, popToast])
 
   const handleQuickEvent = useCallback((type: EventType) => {
     const h = nowClockHour()
-    const labels = { A: 'Feed', C: 'Co-sleep', X: 'Note' } as const
+    const labels = { A: 'Toma', C: 'Colecho', X: 'Nota' } as const
 
     setStored(prev => {
       const { nights: updatedNights, idx } = getOrCreateTonight(prev.nights, dayStart)
@@ -143,7 +143,7 @@ export default function App() {
       return { nights: result }
     })
 
-    popToast(`${labels[type]} logged · ${fmt12Short(h)}`)
+    popToast(`${labels[type]} · ${fmt12Short(h)}`)
   }, [dayStart, popToast])
 
   const handleDeleteEvent = useCallback((ev: { kind: string; t: number }) => {
@@ -182,7 +182,7 @@ export default function App() {
       result[idx] = updatedNight
       return { nights: result }
     })
-    popToast('Entry deleted')
+    popToast('Entrada eliminada')
   }, [dayStart, popToast])
 
   const handleManualSave = useCallback((entry: { type: string; hour: number; minute: number; dayOffset: number }) => {
@@ -218,14 +218,14 @@ export default function App() {
       return { nights }
     })
 
-    popToast('Entry saved')
+    popToast('Entrada guardada')
     setShowModal(false)
   }, [popToast])
 
   const handleClosePeriod = useCallback(() => {
     setShowCloseModal(false)
     setStored({ nights: [] })
-    popToast('Journal closed · starting fresh')
+    popToast('Diario cerrado · empezando de cero')
     setTab('home')
   }, [popToast])
 
@@ -260,8 +260,8 @@ export default function App() {
       </div>
 
       <div className="tabs">
-        <button className={`tab${tab === 'home' ? ' active' : ''}`} onClick={() => setTab('home')}>Today</button>
-        <button className={`tab${tab === 'sheet' ? ' active' : ''}`} onClick={() => setTab('sheet')}>Journal</button>
+        <button className={`tab${tab === 'home' ? ' active' : ''}`} onClick={() => setTab('home')}>Hoy</button>
+        <button className={`tab${tab === 'sheet' ? ' active' : ''}`} onClick={() => setTab('sheet')}>Diario</button>
       </div>
 
       <div className="screen">
@@ -304,10 +304,10 @@ export default function App() {
         <div className="modal-back" onClick={(e) => { if ((e.target as HTMLElement).classList.contains('modal-back')) setShowCloseModal(false) }}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-handle" />
-            <h2 className="modal-title">Close this journal?</h2>
-            <p className="modal-sub">You'll start a new journal from night 1.</p>
-            <button className="modal-confirm" onClick={handleClosePeriod}>Yes, close and start fresh</button>
-            <button className="modal-cancel" onClick={() => setShowCloseModal(false)}>Cancel</button>
+            <h2 className="modal-title">¿Cerrar este diario?</h2>
+            <p className="modal-sub">Empezarás un diario nuevo desde la noche 1.</p>
+            <button className="modal-confirm" onClick={handleClosePeriod}>Sí, cerrar y empezar de cero</button>
+            <button className="modal-cancel" onClick={() => setShowCloseModal(false)}>Cancelar</button>
           </div>
         </div>
       )}
@@ -319,7 +319,7 @@ export default function App() {
         <SettingsModal
           settings={settings}
           onChange={patchSettings}
-          onNewJournal={() => { setStored({ nights: [] }); setShowSettings(false); popToast('Journal closed · starting fresh') }}
+          onNewJournal={() => { setStored({ nights: [] }); setShowSettings(false); popToast('Diario cerrado · empezando de cero') }}
           onClose={() => setShowSettings(false)}
         />
       )}

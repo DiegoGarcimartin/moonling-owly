@@ -21,47 +21,48 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
   const dayStartLabel = fmt12(dayStart, 0)
 
   const todayDate = new Date()
-  const todayLabel = `${todayDate.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][todayDate.getMonth()]}`
+  const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
+  const todayLabel = `${todayDate.getDate()} ${MESES[todayDate.getMonth()]}`
 
   if (state === 'empty' || !today) {
     return (
       <div className="screen-inner">
         <div className="empty-hero">
-          <div className="empty-eyebrow">Day 0 · {todayLabel}</div>
-          <h1 className="empty-title">We start<br /><em className="serif-italic">tonight</em>.</h1>
+          <div className="empty-eyebrow">Día 0 · {todayLabel}</div>
+          <h1 className="empty-title">Empezamos<br /><em className="serif-italic">esta noche</em>.</h1>
           <p className="empty-sub">
-            Tap the button when you put the baby to sleep.
-            In 14 nights you'll have a journal ready for your doctor.
+            Pulsa el botón cuando pongas al bebé a dormir.
+            En 14 noches tendrás un diario listo para tu pediatra.
           </p>
         </div>
         <button className="primary-cta" onClick={onSleepToggle}>
           <div className="primary-cta-l">
-            <div className="primary-cta-eyebrow">start</div>
-            <div className="primary-cta-label">Sleep started</div>
+            <div className="primary-cta-eyebrow">inicio</div>
+            <div className="primary-cta-label">Inicio de sueño</div>
           </div>
           <div className="primary-cta-r">
             <div className="primary-cta-arrow">↓</div>
-            <div>now</div>
+            <div>ahora</div>
           </div>
         </button>
         <div className="empty-aside">
-          <span>or</span>
+          <span>o</span>
           <button className="manual-add prominent" onClick={onManual}>
             <Icon name="plus" size={16} />
-            <span>Add entry manually</span>
+            <span>Añadir entrada manual</span>
           </button>
         </div>
         <div className="first-guide">
-          <div className="first-guide-eyebrow">How it works</div>
+          <div className="first-guide-eyebrow">Cómo funciona</div>
           <ul className="first-guide-list">
-            <li><span className="first-guide-icon"><Icon name="sleep-start" size={16}/></span><span><b>Sleep start.</b> Tap when you begin the bedtime routine.</span></li>
-            <li><span className="first-guide-icon"><Icon name="sleep-end" size={16}/></span><span><b>Wakeup.</b> Tap when the baby is finally up — not for night wakings.</span></li>
-            <li><span className="first-guide-icon"><Icon name="feed" size={16}/></span><span><b>Feed.</b> Tap whenever you feed (incl. as part of bedtime).</span></li>
-            <li><span className="first-guide-icon"><Icon name="cosleep" size={16}/></span><span><b>Co-sleep.</b> Tap if you share the bed at any point.</span></li>
-            <li><span className="first-guide-icon"><Icon name="note" size={16}/></span><span><b>Note.</b> Anything unusual: long crying, movement, snoring…</span></li>
+            <li><span className="first-guide-icon"><Icon name="sleep-start" size={16}/></span><span><b>Inicio de sueño.</b> Pulsa cuando empieces la rutina de sueño.</span></li>
+            <li><span className="first-guide-icon"><Icon name="sleep-end" size={16}/></span><span><b>Despertar.</b> Pulsa cuando el bebé esté definitivamente despierto — no para despertares nocturnos.</span></li>
+            <li><span className="first-guide-icon"><Icon name="feed" size={16}/></span><span><b>Toma.</b> Pulsa cada vez que des una toma (incluyendo antes de dormir).</span></li>
+            <li><span className="first-guide-icon"><Icon name="cosleep" size={16}/></span><span><b>Colecho.</b> Pulsa si compartes cama en algún momento.</span></li>
+            <li><span className="first-guide-icon"><Icon name="note" size={16}/></span><span><b>Nota.</b> Cualquier cosa inusual: llanto prolongado, movimientos, ronquidos…</span></li>
           </ul>
           <div className="first-guide-foot">
-            A <em>night</em> runs from <b className="mono">{dayStartLabel}</b> to <b className="mono">{dayStartLabel}</b> the next day — the clinical convention. Change it in settings if your family goes to bed earlier.
+            Una <em>noche</em> va desde <b className="mono">{dayStartLabel}</b> hasta <b className="mono">{dayStartLabel}</b> del día siguiente — la convención clínica. Cámbialo en ajustes si tu familia se acuesta antes.
           </div>
         </div>
       </div>
@@ -78,11 +79,11 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
   type EventListItem = { kind: string; t: number; label: string }
   const eventList: EventListItem[] = []
   for (const [s, e] of today.sleeps || []) {
-    eventList.push({ kind: 'sleep_start', t: s, label: 'Sleep start' })
-    if (!today.inProgress || e < nowTrack) eventList.push({ kind: 'sleep_end', t: e, label: 'Wakeup' })
+    eventList.push({ kind: 'sleep_start', t: s, label: 'Inicio de sueño' })
+    if (!today.inProgress || e < nowTrack) eventList.push({ kind: 'sleep_end', t: e, label: 'Despertar' })
   }
   for (const ev of today.events || []) {
-    const labels = { A: 'Feed', C: 'Co-sleep', X: 'Note' }
+    const labels = { A: 'Toma', C: 'Colecho', X: 'Nota' }
     eventList.push({ kind: ev.type === 'A' ? 'feeding' : ev.type === 'C' ? 'cosleep' : 'incident', t: ev.t, label: labels[ev.type] })
   }
   eventList.sort((a, b) => a.t - b.t)
@@ -101,12 +102,12 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
       <div className="status-bar">
         <div className="status-state">
           <span className={`status-dot ${sleeping ? 'sleeping' : 'awake'}`}></span>
-          {sleeping ? 'Sleeping' : 'Awake'}
-          <span className="status-since">since {nowClock}</span>
+          {sleeping ? 'Durmiendo' : 'Despierto'}
+          <span className="status-since">desde las {nowClock}</span>
         </div>
         <div className="status-meta-wrap">
-          <div className="status-meta mono">night <b>{days.length}</b> / 14</div>
-          <button className="help-btn" onClick={onHelp} aria-label="How it works">
+          <div className="status-meta mono">noche <b>{days.length}</b> / 14</div>
+          <button className="help-btn" onClick={onHelp} aria-label="Cómo funciona">
             <Icon name="help" size={15}/>
           </button>
         </div>
@@ -114,12 +115,12 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
 
       <button className={`primary-cta${sleeping ? ' sleeping' : ''}`} onClick={onSleepToggle}>
         <div className="primary-cta-l">
-          <div className="primary-cta-eyebrow">{sleeping ? 'when they wake up' : 'when sleep starts'}</div>
-          <div className="primary-cta-label">{sleeping ? 'Mark wakeup' : 'Mark sleep start'}</div>
+          <div className="primary-cta-eyebrow">{sleeping ? 'cuando se despierte' : 'cuando empiece el sueño'}</div>
+          <div className="primary-cta-label">{sleeping ? 'Marcar despertar' : 'Marcar inicio de sueño'}</div>
         </div>
         <div className="primary-cta-r">
           <div className="primary-cta-arrow">{sleeping ? '↑' : '↓'}</div>
-          <div>now</div>
+          <div>ahora</div>
           <div>{nowClock}</div>
         </div>
       </button>
@@ -127,27 +128,27 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
       <div className="secondary-row">
         <button className="sec-btn" onClick={() => onQuickEvent('A')}>
           <span className="sec-glyph feed"><Icon name="feed" size={16}/></span>
-          <span>Feed</span>
+          <span>Toma</span>
         </button>
         <button className="sec-btn" onClick={() => onQuickEvent('C')}>
           <span className="sec-glyph bed"><Icon name="cosleep" size={16}/></span>
-          <span>Co-sleep</span>
+          <span>Colecho</span>
         </button>
         <button className="sec-btn" onClick={() => onQuickEvent('X')}>
           <span className="sec-glyph note"><Icon name="note" size={16}/></span>
-          <span>Note</span>
+          <span>Nota</span>
         </button>
       </div>
 
       <button className="manual-add prominent" onClick={onManual}>
         <Icon name="plus" size={16} />
-        <span>Add entry manually</span>
+        <span>Añadir entrada manual</span>
       </button>
 
       <div className="strip">
         <div className="strip-head">
-          <span className="strip-title">Tonight <span className="strip-range mono">· {dayStartLabel} → {dayStartLabel} +1</span></span>
-          <span className="strip-now mono">ONGOING · {nowClock}</span>
+          <span className="strip-title">Esta noche <span className="strip-range mono">· {dayStartLabel} → {dayStartLabel} +1</span></span>
+          <span className="strip-now mono">EN CURSO · {nowClock}</span>
         </div>
         <div className="strip-grid">
           {HOURS_ARR.map((_, i) =>
@@ -175,20 +176,20 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
 
       {state === 'complete' &&
         <div className="complete-nudge">
-          <div className="complete-eyebrow">journal complete</div>
-          <div className="complete-title">14 nights logged</div>
-          <div className="complete-sub">Close it and start a new one?</div>
-          <button className="complete-cta" onClick={onClosePeriod}>Close this journal</button>
+          <div className="complete-eyebrow">diario completo</div>
+          <div className="complete-title">14 noches registradas</div>
+          <div className="complete-sub">¿Cerrarlo y empezar uno nuevo?</div>
+          <button className="complete-cta" onClick={onClosePeriod}>Cerrar este diario</button>
         </div>
       }
 
       <div className="events">
         <div className="events-title">
-          <span>Today</span>
-          <span>{eventList.length} entries</span>
+          <span>Hoy</span>
+          <span>{eventList.length} {eventList.length === 1 ? 'entrada' : 'entradas'}</span>
         </div>
         {eventList.length === 0
-          ? <div className="no-events">No entries yet today.</div>
+          ? <div className="no-events">Sin entradas por ahora.</div>
           : eventList.map((ev, i) => {
               const iconName = ev.kind === 'sleep_start' ? 'sleep-start'
                 : ev.kind === 'sleep_end' ? 'sleep-end'

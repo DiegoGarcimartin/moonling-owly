@@ -33,41 +33,41 @@ export function SettingsModal({ settings, onChange, onNewJournal, onClose }: Set
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-handle" />
         <div className="settings-head">
-          <h2 className="modal-title">Settings</h2>
-          <button className="iconbtn" onClick={onClose} aria-label="Close" style={{ flexShrink: 0 }}>
+          <h2 className="modal-title">Ajustes</h2>
+          <button className="iconbtn" onClick={onClose} aria-label="Cerrar" style={{ flexShrink: 0 }}>
             <Icon name="close" size={16}/>
           </button>
         </div>
 
         <div className="settings-section">
-          <div className="settings-label">Child</div>
+          <div className="settings-label">Bebé</div>
           <div className="settings-field">
-            <label>Name</label>
-            <input type="text" className="settings-input" value={settings.childName} onChange={(e) => onChange({ childName: e.target.value })} placeholder="e.g. Lila" />
+            <label>Nombre</label>
+            <input type="text" className="settings-input" value={settings.childName} onChange={(e) => onChange({ childName: e.target.value })} placeholder="ej. Lila" />
           </div>
           <div className="settings-field">
-            <label>Age</label>
-            <input type="text" className="settings-input" value={settings.childAge} onChange={(e) => onChange({ childAge: e.target.value })} placeholder="e.g. 11 m" />
+            <label>Edad</label>
+            <input type="text" className="settings-input" value={settings.childAge} onChange={(e) => onChange({ childAge: e.target.value })} placeholder="ej. 11 m" />
           </div>
-          <div className="settings-hint">Shown on the journal you share with your doctor.</div>
+          <div className="settings-hint">Se muestra en el diario que compartes con tu pediatra.</div>
         </div>
 
         <div className="settings-section">
-          <div className="settings-label">Night starts at</div>
+          <div className="settings-label">La noche empieza a las</div>
           <div className="settings-stepper">
-            <button className="settings-step-btn" onClick={() => stepDayStart(-1)} aria-label="Earlier">−</button>
+            <button className="settings-step-btn" onClick={() => stepDayStart(-1)} aria-label="Antes">−</button>
             <div className="settings-step-value">
               <span className="settings-step-num">{hh}</span>
               <span className="settings-step-period mono">{period}</span>
             </div>
-            <button className="settings-step-btn" onClick={() => stepDayStart(1)} aria-label="Later">+</button>
+            <button className="settings-step-btn" onClick={() => stepDayStart(1)} aria-label="Después">+</button>
           </div>
-          <div className="settings-hint">Default is <b className="mono">7 PM</b> — the clinical standard. Most parents won't need to change this.</div>
+          <div className="settings-hint">El estándar clínico es <b className="mono">7 PM</b>. La mayoría de familias no necesitan cambiarlo.</div>
         </div>
 
         <div className="settings-section danger">
-          <button className="settings-danger-btn" onClick={onNewJournal}>Start a new journal</button>
-          <div className="settings-hint">Closes this 14-night period and starts fresh from night 1. We'll keep a copy of the current one.</div>
+          <button className="settings-danger-btn" onClick={onNewJournal}>Empezar un diario nuevo</button>
+          <div className="settings-hint">Cierra este período de 14 noches y empieza desde la noche 1. El diario actual se conserva.</div>
         </div>
 
         <div className="settings-foot">

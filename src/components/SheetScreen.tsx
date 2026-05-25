@@ -16,9 +16,9 @@ export function SheetScreen({ days, state, dayStart, childName, onClosePeriod, o
     return (
       <div className="screen-inner">
         <div className="sheet-head">
-          <div className="sheet-eyebrow">Journal · 0 nights</div>
-          <h1 className="sheet-title">Your journal<br /><em className="serif-italic">is waiting</em></h1>
-          <div className="sheet-meta"><span>It begins as soon as you log your first night.</span></div>
+          <div className="sheet-eyebrow">Diario · 0 noches</div>
+          <h1 className="sheet-title">Tu diario<br /><em className="serif-italic">te espera</em></h1>
+          <div className="sheet-meta"><span>Empieza en cuanto registres tu primera noche.</span></div>
         </div>
         <div className="sheet-paper">
           <div className="empty-grid">
@@ -38,8 +38,8 @@ export function SheetScreen({ days, state, dayStart, childName, onClosePeriod, o
   const avgNight = days.reduce((s, d) => s + nightSleepHours(d, dayStart), 0) / totalNights
   const totalWakeups = days.reduce((s, d) => s + nightWakeups(d), 0)
 
-  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-  const fmtDate = (iso: string) => { const d = new Date(iso); return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}` }
+  const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
+  const fmtDate = (iso: string) => { const d = new Date(iso); return `${d.getUTCDate()} ${MESES[d.getUTCMonth()]}` }
   const firstDate = days[0].date
   const lastDate = days[totalNights - 1].date
   const dateRange = firstDate === lastDate ? fmtDate(firstDate) : `${fmtDate(firstDate)} — ${fmtDate(lastDate)}`
@@ -49,16 +49,16 @@ export function SheetScreen({ days, state, dayStart, childName, onClosePeriod, o
     <div className="screen-inner">
       <div className="sheet-head">
         <div className="sheet-head-top">
-          <div className="sheet-eyebrow">Journal · {totalNights} night{totalNights === 1 ? '' : 's'}</div>
-          <button className="sheet-menu" onClick={onClosePeriod} aria-label="Close journal">
+          <div className="sheet-eyebrow">Diario · {totalNights} {totalNights === 1 ? 'noche' : 'noches'}</div>
+          <button className="sheet-menu" onClick={onClosePeriod} aria-label="Cerrar diario">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="19" cy="12" r="1.7" /></svg>
           </button>
         </div>
-        <h1 className="sheet-title">My sleep<br /><em className="serif-italic">journal</em></h1>
+        <h1 className="sheet-title">Mi diario<br /><em className="serif-italic">de sueño</em></h1>
         <div className="sheet-meta">
-          {childName && <span>for <b>{childName}</b></span>}
+          {childName && <span>de <b>{childName}</b></span>}
           <span><b>{dateRange}</b>, {year}</span>
-          <span><b>{totalNights}</b> night{totalNights === 1 ? '' : 's'}</span>
+          <span><b>{totalNights}</b> {totalNights === 1 ? 'noche' : 'noches'}</span>
         </div>
       </div>
 
@@ -67,15 +67,15 @@ export function SheetScreen({ days, state, dayStart, childName, onClosePeriod, o
       </div>
 
       <div className="sheet-legend">
-        <div className="legend-item"><span className="legend-swatch bar"></span><span>asleep</span></div>
-        <div className="legend-item"><span className="legend-swatch dot dot-feed"><Icon name="feed" size={10} stroke={2.4}/></span><span>feed</span></div>
-        <div className="legend-item"><span className="legend-swatch dot dot-co"><Icon name="cosleep" size={10} stroke={2.4}/></span><span>co-sleep</span></div>
-        <div className="legend-item"><span className="legend-swatch dot dot-x"><Icon name="note" size={10} stroke={2.4}/></span><span>note</span></div>
+        <div className="legend-item"><span className="legend-swatch bar"></span><span>dormido</span></div>
+        <div className="legend-item"><span className="legend-swatch dot dot-feed"><Icon name="feed" size={10} stroke={2.4}/></span><span>toma</span></div>
+        <div className="legend-item"><span className="legend-swatch dot dot-co"><Icon name="cosleep" size={10} stroke={2.4}/></span><span>colecho</span></div>
+        <div className="legend-item"><span className="legend-swatch dot dot-x"><Icon name="note" size={10} stroke={2.4}/></span><span>nota</span></div>
       </div>
 
       <div className="stats-row">
         <div className="stat">
-          <div className="stat-label">Avg / night</div>
+          <div className="stat-label">Media / noche</div>
           <div className="stat-val">{avgNight.toFixed(1)}<small>h</small></div>
         </div>
         <div className="stat">
@@ -83,24 +83,24 @@ export function SheetScreen({ days, state, dayStart, childName, onClosePeriod, o
           <div className="stat-val">{Math.round(totalSleep)}<small>h</small></div>
         </div>
         <div className="stat">
-          <div className="stat-label">Wake-ups</div>
+          <div className="stat-label">Despertares</div>
           <div className="stat-val">{totalWakeups}</div>
         </div>
       </div>
 
       <div className="diario-share">
         <div className="diario-share-head">
-          <div className="diario-share-eyebrow">for your doctor</div>
-          <h2 className="diario-share-title">When you're ready,<br/>share it.</h2>
-          <p className="diario-share-sub">Formatted as sleep specialists expect. Preview before sending.</p>
+          <div className="diario-share-eyebrow">para tu pediatra</div>
+          <h2 className="diario-share-title">Cuando estés listo,<br/>compártelo.</h2>
+          <p className="diario-share-sub">Formato clínico estándar. Previsualiza antes de enviar.</p>
         </div>
         <button className="share-cta" onClick={onShare}>
           <Icon name="share" size={18}/>
-          <span>Share / Print</span>
+          <span>Compartir / Imprimir</span>
         </button>
         {state === 'complete' &&
           <button className="close-period-btn" onClick={onClosePeriod}>
-            Close this journal and start a new one
+            Cerrar este diario y empezar uno nuevo
           </button>
         }
       </div>

@@ -16,9 +16,9 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
   const scalerRef = useRef<HTMLDivElement>(null)
   const docRef = useRef<HTMLDivElement>(null)
 
-  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+  const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
   const lastDate = days.length ? new Date(days[days.length - 1].date) : new Date()
-  const dateLabel = `${lastDate.getUTCDate()} ${MONTHS[lastDate.getUTCMonth()]} ${lastDate.getUTCFullYear()}`
+  const dateLabel = `${lastDate.getUTCDate()} ${MESES[lastDate.getUTCMonth()]} ${lastDate.getUTCFullYear()}`
 
   useEffect(() => {
     const update = () => {
@@ -53,8 +53,8 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Sleep journal · Moonling Owly',
-          text: childName ? `${childName} — 14-night sleep self-report` : '14-night sleep self-report',
+          title: 'Diario de sueño · Moonling Owly',
+          text: childName ? `${childName} — autoinforme de sueño 14 noches` : 'Autoinforme de sueño 14 noches',
         })
       } catch { /* ignored */ }
     } else {
@@ -68,10 +68,10 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
         <div className="modal-handle" />
         <div className="share-preview-head">
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h2 className="modal-title">Doctor's view</h2>
-            <p className="modal-sub">Tap a blank to fill it in. Same format clinics use.</p>
+            <h2 className="modal-title">Vista del pediatra</h2>
+            <p className="modal-sub">Toca un campo para rellenarlo. Formato clínico estándar.</p>
           </div>
-          <button className="iconbtn" onClick={onClose} aria-label="Close" style={{ flexShrink: 0 }}>
+          <button className="iconbtn" onClick={onClose} aria-label="Cerrar" style={{ flexShrink: 0 }}>
             <Icon name="close" size={16}/>
           </button>
         </div>
@@ -81,49 +81,49 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
             <div className="doc-head">
               <div className="doc-brand">
                 <div className="doc-brand-name">Moonling Owly</div>
-                <div className="doc-brand-sub mono">sleep self-report · {days.length} night{days.length === 1 ? '' : 's'}</div>
+                <div className="doc-brand-sub mono">autoinforme de sueño · {days.length} {days.length === 1 ? 'noche' : 'noches'}</div>
               </div>
               <div className="doc-meta">
                 <div className="doc-meta-row">
-                  <span>Name</span>
-                  <input className="doc-fillin" type="text" value={childName} onChange={(e) => onUpdate({ childName: e.target.value })} placeholder="Tap to fill" aria-label="Child name" />
+                  <span>Nombre</span>
+                  <input className="doc-fillin" type="text" value={childName} onChange={(e) => onUpdate({ childName: e.target.value })} placeholder="Toca para rellenar" aria-label="Nombre del bebé" />
                 </div>
                 <div className="doc-meta-row">
-                  <span>Age</span>
-                  <input className="doc-fillin short" type="text" value={childAge} onChange={(e) => onUpdate({ childAge: e.target.value })} placeholder="e.g. 11 m" aria-label="Child age" />
+                  <span>Edad</span>
+                  <input className="doc-fillin short" type="text" value={childAge} onChange={(e) => onUpdate({ childAge: e.target.value })} placeholder="ej. 11 m" aria-label="Edad del bebé" />
                 </div>
-                <div className="doc-meta-row"><span>Date</span><b>{dateLabel}</b></div>
-                <div className="doc-meta-row"><span>Day starts</span><b className="mono">{fmt12(dayStart, 0)}</b></div>
+                <div className="doc-meta-row"><span>Fecha</span><b>{dateLabel}</b></div>
+                <div className="doc-meta-row"><span>Inicio noche</span><b className="mono">{fmt12(dayStart, 0)}</b></div>
               </div>
             </div>
             <div className="doc-grid">
               <SheetGrid days={days} dayStart={dayStart} print={true} />
             </div>
             <div className="doc-legend">
-              <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↓</span></span>bedtime starts</span>
-              <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↑</span></span>woke up for the day</span>
-              <span className="doc-legend-item"><span className="doc-legend-glyph asleep"></span>asleep</span>
-              <span className="doc-legend-item"><span className="doc-legend-glyph feed"><Icon name="feed" size={10} stroke={2.4}/></span>feeding</span>
-              <span className="doc-legend-item"><span className="doc-legend-glyph co"><Icon name="cosleep" size={10} stroke={2.4}/></span>co-sleeping</span>
-              <span className="doc-legend-item"><span className="doc-legend-glyph note"><Icon name="note" size={10} stroke={2.4}/></span>notable event</span>
+              <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↓</span></span>inicio sueño</span>
+              <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↑</span></span>despertar definitivo</span>
+              <span className="doc-legend-item"><span className="doc-legend-glyph asleep"></span>dormido</span>
+              <span className="doc-legend-item"><span className="doc-legend-glyph feed"><Icon name="feed" size={10} stroke={2.4}/></span>toma</span>
+              <span className="doc-legend-item"><span className="doc-legend-glyph co"><Icon name="cosleep" size={10} stroke={2.4}/></span>colecho</span>
+              <span className="doc-legend-item"><span className="doc-legend-glyph note"><Icon name="note" size={10} stroke={2.4}/></span>incidencia</span>
             </div>
             <div className="doc-footer">
-              <span>moonling owly · self-report</span>
-              <span>page 1 / 1</span>
+              <span>moonling owly · autoinforme</span>
+              <span>página 1 / 1</span>
             </div>
           </div>
         </div>
 
         <div className="share-preview-actions">
           <button className="share-preview-btn primary" onClick={handleNativeShare}>
-            <Icon name="share" size={16}/><span>Share…</span>
+            <Icon name="share" size={16}/><span>Compartir…</span>
           </button>
           <button className="share-preview-btn" onClick={() => window.print()}>
-            <span style={{ fontSize: 16, lineHeight: '1' }}>⎙</span><span>Print / Save PDF</span>
+            <span style={{ fontSize: 16, lineHeight: '1' }}>⎙</span><span>Imprimir / Guardar PDF</span>
           </button>
         </div>
         <p className="share-preview-foot">
-          "Share…" opens the system sheet (WhatsApp, AirDrop, Files…). On desktop, use Print → Save as PDF.
+          "Compartir…" abre el menú del sistema (WhatsApp, AirDrop, Archivos…). En escritorio usa Imprimir → Guardar como PDF.
         </p>
       </div>
     </div>

@@ -14,11 +14,11 @@ export function EntryModal({ onClose, onSave }: EntryModalProps) {
   const [dayOffset, setDayOffset] = useState(0)
 
   const types = [
-    { id: 'sleep_start', label: 'Sleep start', icon: 'sleep-start', cls: 'sleep-start' },
-    { id: 'sleep_end',   label: 'Wakeup',      icon: 'sleep-end',   cls: 'sleep-end' },
-    { id: 'A',           label: 'Feed',        icon: 'feed',        cls: 'feeding' },
-    { id: 'C',           label: 'Co-sleep',    icon: 'cosleep',     cls: 'cosleep' },
-    { id: 'X',           label: 'Note',        icon: 'note',        cls: 'incident' },
+    { id: 'sleep_start', label: 'Inicio sueño', icon: 'sleep-start', cls: 'sleep-start' },
+    { id: 'sleep_end',   label: 'Despertar',    icon: 'sleep-end',   cls: 'sleep-end' },
+    { id: 'A',           label: 'Toma',         icon: 'feed',        cls: 'feeding' },
+    { id: 'C',           label: 'Colecho',      icon: 'cosleep',     cls: 'cosleep' },
+    { id: 'X',           label: 'Nota',         icon: 'note',        cls: 'incident' },
   ]
 
   const step = (deltaMin: number) => {
@@ -34,22 +34,23 @@ export function EntryModal({ onClose, onSave }: EntryModalProps) {
     setMinute(Math.floor(d.getMinutes() / 5) * 5)
   }
 
+  const DIAS = ['dom','lun','mar','mié','jue','vie','sáb']
   const now = new Date()
   const dayLabels = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(now)
     d.setDate(d.getDate() + (i - 6))
-    const dow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]
-    return i === 6 ? `Today ${d.getDate()}` : `${dow} ${d.getDate()}`
+    const dow = DIAS[d.getDay()]
+    return i === 6 ? `hoy ${d.getDate()}` : `${dow} ${d.getDate()}`
   })
 
   return (
     <div className="modal-back" onClick={(e) => { if ((e.target as HTMLElement).classList.contains('modal-back')) onClose() }}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-handle" />
-        <h2 className="modal-title">Add an entry</h2>
-        <p className="modal-sub">Log what you remember. No stress.</p>
+        <h2 className="modal-title">Añadir entrada</h2>
+        <p className="modal-sub">Registra lo que recuerdes. Sin estrés.</p>
 
-        <div className="modal-section-label">What happened</div>
+        <div className="modal-section-label">Qué pasó</div>
         <div className="type-grid">
           {types.map(t => (
             <button key={t.id} className={`type-btn${type === t.id ? ' selected' : ''}`} onClick={() => setType(t.id)}>
@@ -59,7 +60,7 @@ export function EntryModal({ onClose, onSave }: EntryModalProps) {
           ))}
         </div>
 
-        <div className="modal-section-label">When</div>
+        <div className="modal-section-label">Cuándo</div>
         <div className="day-row">
           {dayLabels.map((lbl, i) => {
             const parts = lbl.split(' ')
@@ -77,13 +78,13 @@ export function EntryModal({ onClose, onSave }: EntryModalProps) {
         <div className="time-row">
           <div className="time-display">{fmt12(hour, minute)}</div>
           <div className="time-pad">
-            <button className="now-pill" onClick={setNow}>now</button>
+            <button className="now-pill" onClick={setNow}>ahora</button>
           </div>
         </div>
 
         <div className="time-pad" style={{ justifyContent: 'space-between', marginBottom: 18 }}>
           <div className="time-pad" style={{ gap: 4 }}>
-            <span className="mono" style={{ fontSize: 10, color: 'var(--text-mute)', marginRight: 6 }}>hour</span>
+            <span className="mono" style={{ fontSize: 10, color: 'var(--text-mute)', marginRight: 6 }}>hora</span>
             <button className="time-step" onClick={() => step(-60)}>−</button>
             <button className="time-step" onClick={() => step(60)}>+</button>
           </div>
@@ -94,8 +95,8 @@ export function EntryModal({ onClose, onSave }: EntryModalProps) {
           </div>
         </div>
 
-        <button className="modal-confirm" onClick={() => onSave({ type, hour, minute, dayOffset })}>Save</button>
-        <button className="modal-cancel" onClick={onClose}>Cancel</button>
+        <button className="modal-confirm" onClick={() => onSave({ type, hour, minute, dayOffset })}>Guardar</button>
+        <button className="modal-cancel" onClick={onClose}>Cancelar</button>
       </div>
     </div>
   )
