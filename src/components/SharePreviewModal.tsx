@@ -57,21 +57,27 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
     setCapturing(true)
 
     try {
-      // Temporarily reset the scale so html2canvas captures full resolution
-      const prevTransform = doc.style.transform
-      const prevWidth = doc.style.width
-      doc.style.transform = 'none'
-      doc.style.width = '880px'
+      // Clone at natural size off-screen so the visible element is untouched
+      const clone = doc.cloneNode(true) as HTMLElement
+      clone.style.transform = 'none'
+      clone.style.width = '880px'
+      clone.style.position = 'fixed'
+      clone.style.top = '-9999px'
+      clone.style.left = '0'
+      clone.style.borderRadius = '12px'
+      document.body.appendChild(clone)
 
-      const canvas = await html2canvas(doc, {
+      const bgColor = getComputedStyle(doc).backgroundColor
+
+      const canvas = await html2canvas(clone, {
         scale: 2,
         useCORS: true,
-        backgroundColor: null,
+        backgroundColor: bgColor,
         logging: false,
+        width: 880,
       })
 
-      doc.style.transform = prevTransform
-      doc.style.width = prevWidth
+      document.body.removeChild(clone)
 
       const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, 'image/png'))
       if (!blob) throw new Error('canvas blob failed')
@@ -79,17 +85,9 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
       const file = new File([blob], 'moonling-owly.png', { type: 'image/png' })
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: childName ? `${childName} — diario de sueño` : 'Diario de sueño',
-        })
-      } else if (navigator.share) {
-        await navigator.share({
-          title: 'Diario de sueño · Moonling Owly',
-          text: childName ? `${childName} — ${days.length} noches registradas` : `${days.length} noches registradas`,
-        })
+        await navigator.share({ files: [file], title: childName ? `${childName} — diario de sueño` : 'Diario de sueño' })
       } else {
-        // Desktop: trigger download
+        // Desktop or browsers without file share: download the image
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
@@ -98,13 +96,11 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
         URL.revokeObjectURL(url)
       }
     } catch {
-      // Silently ignore user cancellations
+      // User cancelled share or capture failed silently
     } finally {
       setCapturing(false)
     }
   }
-
-  const handlePrint = () => window.print()
 
   return (
     <div className="modal-back share-preview-back" onClick={(e) => { if ((e.target as HTMLElement).classList.contains('share-preview-back')) onClose() }}>
@@ -122,7 +118,6 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
 
         <div className="doc-scaler" ref={scalerRef}>
           <div className="doc" id="printable-doc" ref={docRef}>
-            <div className="doc-poster-bg" />
             <div className="doc-head">
               <div className="doc-brand">
                 <div className="doc-brand-name">Moonling <em>Owly</em></div>
@@ -163,7 +158,7 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
           <button className="share-preview-btn primary" onClick={captureAndShare} disabled={capturing}>
             <Icon name="share" size={16}/><span>{capturing ? 'Generando…' : 'Compartir imagen'}</span>
           </button>
-          <button className="share-preview-btn" onClick={handlePrint}>
+          <button className="share-preview-btn" onClick={() => window.print()}>
             <span style={{ fontSize: 16, lineHeight: '1' }}>⎙</span><span>Guardar PDF</span>
           </button>
         </div>
