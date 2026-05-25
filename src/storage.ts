@@ -61,8 +61,9 @@ export function nightsToDays(nights: StoredNight[], dayStart: number): Day[] {
       // end is null (ongoing) → use current track position
       const endH = s.end !== null ? s.end : nowClockHour()
       let end = clockToTrack(endH, dayStart)
-      // If end wraps or is before start (crosses midnight), add 1440
-      if (end <= start) end += 1440
+      // If end wraps before start (crosses midnight), add 1440.
+      // Strictly less-than: end===start means duration 0 (just started), not 24h.
+      if (end < start) end += 1440
       sleeps.push([start, end])
     }
     const d = new Date(n.date)
