@@ -765,3 +765,126 @@ html, body, #root {
   }
   @page { size: A4 landscape; margin: 12mm; }
 }
+
+/* ─── Auth screen ─────────────────────────────────────────────────── */
+.auth-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 32px 24px;
+  gap: 32px;
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  font-family: 'Geist', sans-serif;
+  font-weight: 500;
+  color: var(--text);
+}
+.auth-brand-sub {
+  font-size: 18px;
+  opacity: 0.55;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.auth-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 6px;
+}
+
+.auth-sub {
+  font-size: 12.5px;
+  color: var(--text-mute);
+  margin: 0 0 22px;
+  line-height: 1.5;
+}
+
+.auth-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.auth-input {
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'Geist', sans-serif;
+  font-size: 15px;
+  padding: 13px 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.auth-input::placeholder { color: var(--text-mute); }
+.auth-input:focus { border-color: var(--accent); }
+
+.auth-error {
+  font-size: 12px;
+  color: var(--rose);
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: rgba(232, 154, 143, 0.1);
+  border-radius: 8px;
+}
+
+.auth-submit {
+  width: 100%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: none;
+  border-radius: 12px;
+  font-family: 'Geist', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  margin-bottom: 14px;
+}
+.auth-submit:disabled { opacity: 0.4; cursor: default; }
+.auth-submit:not(:disabled):hover { opacity: 0.88; }
+
+.auth-toggle {
+  background: none;
+  border: none;
+  color: var(--text-mute);
+  font-family: 'Geist', sans-serif;
+  font-size: 12.5px;
+  cursor: pointer;
+  padding: 6px 0;
+  text-align: center;
+}
+.auth-toggle:hover { color: var(--text-soft); }
+
+/* Cerrar sesión en ajustes */
+.settings-signout-btn {
+  width: 100%;
+  background: none;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  color: var(--text-mute);
+  font-family: 'Geist', sans-serif;
+  font-size: 13.5px;
+  padding: 11px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.settings-signout-btn:hover { color: var(--text-soft); border-color: var(--text-mute); }
+}

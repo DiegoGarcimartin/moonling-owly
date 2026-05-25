@@ -11,10 +11,11 @@ interface SettingsModalProps {
   settings: AppSettings
   onChange: (patch: Partial<AppSettings>) => void
   onNewJournal: () => void
+  onSignOut: () => void
   onClose: () => void
 }
 
-export function SettingsModal({ settings, onChange, onNewJournal, onClose }: SettingsModalProps) {
+export function SettingsModal({ settings, onChange, onNewJournal, onSignOut, onClose }: SettingsModalProps) {
   const { dayStart } = settings
 
   const stepDayStart = (delta: number) => {
@@ -68,6 +69,10 @@ export function SettingsModal({ settings, onChange, onNewJournal, onClose }: Set
         <div className="settings-section danger">
           <button className="settings-danger-btn" onClick={onNewJournal}>Empezar un diario nuevo</button>
           <div className="settings-hint">Cierra este período de 14 noches y empieza desde la noche 1. El diario actual se conserva.</div>
+        </div>
+
+        <div className="settings-section">
+          <button className="settings-signout-btn" onClick={onSignOut}>Cerrar sesión</button>
         </div>
 
         <div className="settings-foot">
