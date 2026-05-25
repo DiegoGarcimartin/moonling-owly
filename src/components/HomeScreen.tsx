@@ -10,7 +10,7 @@ interface HomeScreenProps {
   onSleepToggle: () => void
   onQuickEvent: (type: 'A' | 'C' | 'X') => void
   onManual: () => void
-  onDeleteEvent: (ev: unknown) => void
+  onDeleteEvent: (ev: { kind: string; t: number }) => void
   onClosePeriod: () => void
   onHelp: () => void
 }
@@ -61,7 +61,7 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
             <li><span className="first-guide-icon"><Icon name="note" size={16}/></span><span><b>Note.</b> Anything unusual: long crying, movement, snoring…</span></li>
           </ul>
           <div className="first-guide-foot">
-            A <em>night</em> runs from <b className="mono">{dayStartLabel}</b> to <b className="mono">{dayEndLabel}</b> the next day — the clinical convention. Change it in settings if your family goes to bed earlier.
+            A <em>night</em> runs from <b className="mono">{dayStartLabel}</b> to <b className="mono">{dayStartLabel}</b> the next day — the clinical convention. Change it in settings if your family goes to bed earlier.
           </div>
         </div>
       </div>

@@ -23,15 +23,9 @@ export function SheetScreen({ days, state, dayStart, childName, onClosePeriod, o
         <div className="sheet-paper">
           <div className="empty-grid">
             <div className="empty-grid-fade">
-              <SheetGrid dayStart={dayStart} days={[
-                { d: '—', label: '—', sleeps: [], events: [] },
-                { d: '—', label: '—', sleeps: [], events: [] },
-                { d: '—', label: '—', sleeps: [], events: [] },
-                { d: '—', label: '—', sleeps: [], events: [] },
-                { d: '—', label: '—', sleeps: [], events: [] },
-                { d: '—', label: '—', sleeps: [], events: [] },
-                { d: '—', label: '—', sleeps: [], events: [] },
-              ]} />
+              <SheetGrid dayStart={dayStart} days={Array.from({ length: 7 }, (_, i) => ({
+                d: '—', label: '—', date: '', sleeps: [] as [number,number][], events: [],
+              }))} />
             </div>
           </div>
         </div>
