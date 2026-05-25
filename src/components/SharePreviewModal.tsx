@@ -57,6 +57,9 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
     setCapturing(true)
 
     try {
+      // Ensure web fonts are fully loaded before capture
+      await document.fonts.ready
+
       // Clone at natural size off-screen so the visible element is untouched
       const clone = doc.cloneNode(true) as HTMLElement
       clone.style.transform = 'none'

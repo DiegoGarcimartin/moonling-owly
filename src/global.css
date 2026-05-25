@@ -648,7 +648,17 @@ html, body, #root {
 .share-preview-sheet { width: 100%; max-width: 360px; background: var(--bg); border-radius: 24px; padding: 14px 20px 22px; border: 1px solid var(--line); max-height: 92vh; overflow: auto; position: relative; animation: slideUp 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .share-preview-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
 .doc-scaler { background: var(--bg-deep); padding: 12px; border-radius: 12px; overflow: hidden; margin: 0 -4px 18px; }
-.doc { background: var(--bg); color: var(--text); padding: 14px 12px 12px; border-radius: 8px; font-family: 'Instrument Serif', Georgia, serif; position: relative; box-shadow: 0 6px 14px rgba(0,0,0,0.2); }
+.doc {
+  /* Always paper/day-mode — print-grid uses hardcoded dark values, must match */
+  --bg: #f3ecdd; --bg-deep: #ede4cf;
+  --text: #1a1830; --text-soft: rgba(26,24,48,0.70); --text-mute: rgba(26,24,48,0.42);
+  --accent: #c66a1c; --accent-ink: #fff7e8;
+  --moonlight: #3d5a93; --rose: #a8463f;
+  --sleep: rgba(61,90,147,0.32); --sleep-strong: rgba(61,90,147,0.68);
+  --line: rgba(20,18,38,0.12); --line-strong: rgba(20,18,38,0.22);
+  --surface: rgba(20,18,38,0.04); --surface-2: rgba(20,18,38,0.07);
+  background: var(--bg); color: var(--text); padding: 14px 12px 12px; border-radius: 8px; font-family: 'Instrument Serif', Georgia, serif; position: relative; box-shadow: 0 4px 18px rgba(0,0,0,0.13);
+}
 .doc-head { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 8px; border-bottom: 1px solid var(--line); margin-bottom: 10px; gap: 12px; }
 .doc-brand-name { font-family: 'Instrument Serif', serif; font-size: 16px; letter-spacing: 0.005em; }
 .doc-brand-name em { color: var(--accent); font-style: italic; }
