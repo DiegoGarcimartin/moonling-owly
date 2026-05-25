@@ -927,6 +927,26 @@ html, body, #root {
 }
 .settings-signout-btn:hover { color: var(--text-soft); border-color: var(--text-mute); }
 
+/* Fila clicable en SheetGrid */
+.cell-day--clickable { cursor: pointer; transition: background 0.15s ease; }
+.cell-day--clickable:hover { background: var(--surface); }
+.cell-day--selected { background: var(--surface-strong) !important; }
+
+/* Log de día seleccionado */
+.day-log { margin: 24px 0 0; }
+.day-log-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.day-log-title { font-family: 'Instrument Serif', Georgia, serif; font-size: 18px; display: flex; align-items: baseline; gap: 8px; }
+.day-log-date { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-mute); letter-spacing: 0.06em; text-transform: uppercase; }
+.day-log-total { font-size: 10px; color: var(--text-mute); letter-spacing: 0.06em; }
+.day-log-empty { font-size: 13.5px; color: var(--text-mute); font-style: italic; padding: 8px 0; }
+.day-log-row { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; border-top: 1px solid var(--line); }
+.day-log-time { font-size: 12px; color: var(--text-soft); width: 52px; flex-shrink: 0; padding-top: 1px; }
+.day-log-label { flex: 1; min-width: 0; font-size: 13.5px; display: flex; flex-direction: column; gap: 2px; }
+
+/* Botón de exportar txt */
+.export-txt-btn { width: 100%; appearance: none; border: 1px dashed var(--line-strong); background: transparent; color: var(--text-soft); padding: 13px; margin-top: 10px; border-radius: 14px; cursor: pointer; font-family: inherit; font-size: 13.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s ease, color 0.2s ease; }
+.export-txt-btn:hover { background: var(--surface); color: var(--text); }
+
 /* Nota inline en event-row */
 .event-label { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
 .event-note { font-size: 11.5px; color: var(--text-soft); font-style: italic; line-height: 1.35; white-space: pre-wrap; word-break: break-word; }
@@ -961,4 +981,3 @@ html, body, #root {
 .onboarding-input:focus { border-color: var(--accent); }
 .onboarding-cta { width: 100%; appearance: none; border: none; background: var(--accent); color: var(--accent-ink); padding: 17px; border-radius: 16px; cursor: pointer; font-family: 'Geist', sans-serif; font-size: 16px; font-weight: 500; transition: transform 0.15s ease, box-shadow 0.2s ease; box-shadow: 0 10px 24px rgba(240,183,92,0.16), inset 0 1px 0 rgba(255,255,255,0.22); }
 .onboarding-cta:active { transform: scale(0.98); }
-}

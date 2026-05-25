@@ -344,6 +344,7 @@ export default function App() {
             state={appState}
             dayStart={dayStart}
             childName={childName}
+            childAge={childAge}
             onClosePeriod={() => setShowCloseModal(true)}
             onShare={() => setShowShare(true)}
           />

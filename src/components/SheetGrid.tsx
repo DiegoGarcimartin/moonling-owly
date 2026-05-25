@@ -6,9 +6,11 @@ interface SheetGridProps {
   days: Day[]
   dayStart?: number
   print?: boolean
+  selectedRow?: number
+  onRowClick?: (idx: number) => void
 }
 
-export function SheetGrid({ days, dayStart = 19, print = false }: SheetGridProps) {
+export function SheetGrid({ days, dayStart = 19, print = false, selectedRow, onRowClick }: SheetGridProps) {
   const HOURS_ARR = getHours(dayStart)
   const cols = HOURS_ARR.length
   const cls = print ? 'sheet-grid print-grid' : 'sheet-grid'
@@ -25,7 +27,10 @@ export function SheetGrid({ days, dayStart = 19, print = false }: SheetGridProps
       ))}
       {days.map((day, rowIdx) => (
         <React.Fragment key={`row-${rowIdx}`}>
-          <div className="cell-day">
+          <div
+            className={`cell-day${selectedRow === rowIdx ? ' cell-day--selected' : ''}${onRowClick ? ' cell-day--clickable' : ''}`}
+            onClick={() => onRowClick?.(rowIdx)}
+          >
             <span style={{ fontSize: 7.5, letterSpacing: '0.06em', textTransform: 'uppercase', opacity: 0.55 }}>{day.label}</span>
             <b>{day.d}</b>
           </div>
