@@ -62,7 +62,7 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
             <li><span className="first-guide-icon"><Icon name="note" size={16}/></span><span><b>Nota.</b> Cualquier cosa inusual: llanto prolongado, movimientos, ronquidos…</span></li>
           </ul>
           <div className="first-guide-foot">
-            Una <em>noche</em> va desde <b className="mono">{dayStartLabel}</b> hasta <b className="mono">{dayStartLabel}</b> del día siguiente — la convención clínica. Cámbialo en ajustes si tu familia se acuesta antes.
+            Una <em>noche</em> va desde las <b className="mono">{dayStartLabel}</b> hasta las <b className="mono">{dayStartLabel}</b> del día siguiente. Puedes cambiarlo en ajustes.
           </div>
         </div>
       </div>

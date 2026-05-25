@@ -63,7 +63,7 @@ export function SettingsModal({ settings, onChange, onNewJournal, onSignOut, onC
             </div>
             <button className="settings-step-btn" onClick={() => stepDayStart(1)} aria-label="Después">+</button>
           </div>
-          <div className="settings-hint">El estándar clínico es <b className="mono">7 PM</b>. La mayoría de familias no necesitan cambiarlo.</div>
+          <div className="settings-hint">Si tu familia empieza antes o después, puedes ajustarlo.</div>
         </div>
 
         <div className="settings-section danger">

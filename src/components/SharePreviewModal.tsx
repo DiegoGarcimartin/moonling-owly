@@ -69,7 +69,7 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
         <div className="share-preview-head">
           <div style={{ flex: 1, minWidth: 0 }}>
             <h2 className="modal-title">Vista del pediatra</h2>
-            <p className="modal-sub">Toca un campo para rellenarlo. Formato clínico estándar.</p>
+            <p className="modal-sub">Toca un campo para rellenarlo antes de compartir.</p>
           </div>
           <button className="iconbtn" onClick={onClose} aria-label="Cerrar" style={{ flexShrink: 0 }}>
             <Icon name="close" size={16}/>
