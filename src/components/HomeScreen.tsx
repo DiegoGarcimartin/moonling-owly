@@ -147,8 +147,8 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
 
       <div className="strip">
         <div className="strip-head">
-          <span className="strip-title">Esta noche <span className="strip-range mono">· {dayStartLabel} → {dayStartLabel} +1</span></span>
-          <span className="strip-now mono">EN CURSO · {nowClock}</span>
+          <span className="strip-title">Esta noche</span>
+          <span className="strip-now mono">en curso · {nowClock}</span>
         </div>
         <div className="strip-grid">
           {HOURS_ARR.map((_, i) =>

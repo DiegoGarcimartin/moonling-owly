@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import html2canvas from 'html2canvas'
 import { Icon } from './Icon'
 import { SheetGrid } from './SheetGrid'
 import { Day, fmt12 } from '../data'
@@ -15,6 +16,7 @@ interface SharePreviewModalProps {
 export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdate, onClose }: SharePreviewModalProps) {
   const scalerRef = useRef<HTMLDivElement>(null)
   const docRef = useRef<HTMLDivElement>(null)
+  const [capturing, setCapturing] = useState(false)
 
   const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
   const lastDate = days.length ? new Date(days[days.length - 1].date) : new Date()
@@ -49,18 +51,60 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
     }
   }, [childName, childAge, days, dayStart])
 
-  const handleNativeShare = async () => {
-    if (navigator.share) {
-      try {
+  const captureAndShare = async () => {
+    const doc = docRef.current
+    if (!doc) return
+    setCapturing(true)
+
+    try {
+      // Temporarily reset the scale so html2canvas captures full resolution
+      const prevTransform = doc.style.transform
+      const prevWidth = doc.style.width
+      doc.style.transform = 'none'
+      doc.style.width = '880px'
+
+      const canvas = await html2canvas(doc, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: null,
+        logging: false,
+      })
+
+      doc.style.transform = prevTransform
+      doc.style.width = prevWidth
+
+      const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, 'image/png'))
+      if (!blob) throw new Error('canvas blob failed')
+
+      const file = new File([blob], 'moonling-owly.png', { type: 'image/png' })
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: childName ? `${childName} — diario de sueño` : 'Diario de sueño',
+        })
+      } else if (navigator.share) {
         await navigator.share({
           title: 'Diario de sueño · Moonling Owly',
-          text: childName ? `${childName} — autoinforme de sueño 14 noches` : 'Autoinforme de sueño 14 noches',
+          text: childName ? `${childName} — ${days.length} noches registradas` : `${days.length} noches registradas`,
         })
-      } catch { /* ignored */ }
-    } else {
-      window.print()
+      } else {
+        // Desktop: trigger download
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'moonling-owly.png'
+        a.click()
+        URL.revokeObjectURL(url)
+      }
+    } catch {
+      // Silently ignore user cancellations
+    } finally {
+      setCapturing(false)
     }
   }
+
+  const handlePrint = () => window.print()
 
   return (
     <div className="modal-back share-preview-back" onClick={(e) => { if ((e.target as HTMLElement).classList.contains('share-preview-back')) onClose() }}>
@@ -68,7 +112,7 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
         <div className="modal-handle" />
         <div className="share-preview-head">
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h2 className="modal-title">Vista del pediatra</h2>
+            <h2 className="modal-title">Compartir diario</h2>
             <p className="modal-sub">Toca un campo para rellenarlo antes de compartir.</p>
           </div>
           <button className="iconbtn" onClick={onClose} aria-label="Cerrar" style={{ flexShrink: 0 }}>
@@ -78,10 +122,11 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
 
         <div className="doc-scaler" ref={scalerRef}>
           <div className="doc" id="printable-doc" ref={docRef}>
+            <div className="doc-poster-bg" />
             <div className="doc-head">
               <div className="doc-brand">
-                <div className="doc-brand-name">Moonling Owly</div>
-                <div className="doc-brand-sub mono">autoinforme de sueño · {days.length} {days.length === 1 ? 'noche' : 'noches'}</div>
+                <div className="doc-brand-name">Moonling <em>Owly</em></div>
+                <div className="doc-brand-sub mono">diario de sueño · {days.length} {days.length === 1 ? 'noche' : 'noches'}</div>
               </div>
               <div className="doc-meta">
                 <div className="doc-meta-row">
@@ -101,30 +146,27 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onUpdat
             </div>
             <div className="doc-legend">
               <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↓</span></span>inicio sueño</span>
-              <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↑</span></span>despertar definitivo</span>
+              <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↑</span></span>despertar</span>
               <span className="doc-legend-item"><span className="doc-legend-glyph asleep"></span>dormido</span>
               <span className="doc-legend-item"><span className="doc-legend-glyph feed"><Icon name="feed" size={10} stroke={2.4}/></span>toma</span>
               <span className="doc-legend-item"><span className="doc-legend-glyph co"><Icon name="cosleep" size={10} stroke={2.4}/></span>colecho</span>
-              <span className="doc-legend-item"><span className="doc-legend-glyph note"><Icon name="note" size={10} stroke={2.4}/></span>incidencia</span>
+              <span className="doc-legend-item"><span className="doc-legend-glyph note"><Icon name="note" size={10} stroke={2.4}/></span>nota</span>
             </div>
             <div className="doc-footer">
-              <span>moonling owly · autoinforme</span>
+              <span>moonling owly</span>
               <span>página 1 / 1</span>
             </div>
           </div>
         </div>
 
         <div className="share-preview-actions">
-          <button className="share-preview-btn primary" onClick={handleNativeShare}>
-            <Icon name="share" size={16}/><span>Compartir…</span>
+          <button className="share-preview-btn primary" onClick={captureAndShare} disabled={capturing}>
+            <Icon name="share" size={16}/><span>{capturing ? 'Generando…' : 'Compartir imagen'}</span>
           </button>
-          <button className="share-preview-btn" onClick={() => window.print()}>
-            <span style={{ fontSize: 16, lineHeight: '1' }}>⎙</span><span>Imprimir / Guardar PDF</span>
+          <button className="share-preview-btn" onClick={handlePrint}>
+            <span style={{ fontSize: 16, lineHeight: '1' }}>⎙</span><span>Guardar PDF</span>
           </button>
         </div>
-        <p className="share-preview-foot">
-          "Compartir…" abre el menú del sistema (WhatsApp, AirDrop, Archivos…). En escritorio usa Imprimir → Guardar como PDF.
-        </p>
       </div>
     </div>
   )

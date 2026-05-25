@@ -647,26 +647,28 @@ html, body, #root {
 .share-preview-back { align-items: center; padding: 24px 18px; }
 .share-preview-sheet { width: 100%; max-width: 360px; background: var(--bg); border-radius: 24px; padding: 14px 20px 22px; border: 1px solid var(--line); max-height: 92vh; overflow: auto; position: relative; animation: slideUp 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .share-preview-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
-.doc-scaler { background: #2a2a3a; padding: 12px; border-radius: 12px; overflow: hidden; margin: 0 -4px 18px; }
-.doc { background: #fbf6e9; color: #1a1830; padding: 14px 12px 12px; border-radius: 8px; font-family: 'Instrument Serif', Georgia, serif; position: relative; box-shadow: 0 6px 14px rgba(0,0,0,0.2); }
-.doc-head { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 8px; border-bottom: 1px solid rgba(26, 24, 48, 0.18); margin-bottom: 10px; gap: 12px; }
-.doc-brand-name { font-family: 'Instrument Serif', serif; font-size: 16px; letter-spacing: 0.005em; }
-.doc-brand-sub { font-size: 7.5px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(26, 24, 48, 0.55); margin-top: 2px; }
-.doc-meta { display: flex; flex-direction: column; gap: 2px; font-family: 'JetBrains Mono', monospace; font-size: 7.5px; color: rgba(26, 24, 48, 0.7); text-align: right; }
-.doc-meta-row span { opacity: 0.55; margin-right: 5px; }
-.doc-meta-row b { color: #1a1830; font-weight: 600; }
-.doc-fillin { appearance: none; background: transparent; border: none; border-bottom: 1px solid rgba(26, 24, 48, 0.45); font-family: 'Caveat', cursive; font-size: 14px; font-weight: 500; color: #1a1830; padding: 0 4px 2px; width: 130px; text-align: left; outline: none; cursor: text; transition: border-color 0.18s ease; }
+.doc-scaler { background: #080a18; padding: 16px; border-radius: 14px; overflow: hidden; margin: 0 -4px 18px; }
+.doc { background: #0d1224; color: #f3ead7; padding: 20px 18px 16px; border-radius: 10px; font-family: 'Instrument Serif', Georgia, serif; position: relative; box-shadow: 0 0 0 1px rgba(240,183,92,0.15), 0 8px 32px rgba(0,0,0,0.5); overflow: hidden; }
+.doc-poster-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(143,165,212,0.08) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 100% 100%, rgba(240,183,92,0.06) 0%, transparent 60%); pointer-events: none; }
+.doc-head { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 10px; border-bottom: 1px solid rgba(243,234,215,0.12); margin-bottom: 12px; gap: 12px; position: relative; }
+.doc-brand-name { font-family: 'Instrument Serif', serif; font-size: 17px; letter-spacing: 0.01em; color: #f3ead7; }
+.doc-brand-name em { color: #f0b75c; font-style: italic; }
+.doc-brand-sub { font-size: 7.5px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(243,234,215,0.45); margin-top: 3px; }
+.doc-meta { display: flex; flex-direction: column; gap: 3px; font-family: 'JetBrains Mono', monospace; font-size: 7.5px; color: rgba(243,234,215,0.55); text-align: right; position: relative; }
+.doc-meta-row span { opacity: 0.6; margin-right: 5px; }
+.doc-meta-row b { color: rgba(243,234,215,0.9); font-weight: 600; }
+.doc-fillin { appearance: none; background: transparent; border: none; border-bottom: 1px solid rgba(240,183,92,0.35); font-family: 'Caveat', cursive; font-size: 14px; font-weight: 500; color: #f0b75c; padding: 0 4px 2px; width: 130px; text-align: left; outline: none; cursor: text; transition: border-color 0.18s ease; }
 .doc-fillin.short { width: 60px; }
-.doc-fillin::placeholder { color: rgba(26, 24, 48, 0.32); font-style: italic; }
-.doc-fillin:focus { border-bottom-color: #1a1830; }
-.doc-legend { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px 16px; font-family: 'Geist', sans-serif; font-size: 11px; color: rgba(26, 24, 48, 0.75); letter-spacing: 0.01em; }
+.doc-fillin::placeholder { color: rgba(240,183,92,0.3); font-style: italic; }
+.doc-fillin:focus { border-bottom-color: #f0b75c; }
+.doc-legend { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: rgba(243,234,215,0.55); letter-spacing: 0.06em; position: relative; }
 .doc-legend-item { display: inline-flex; align-items: center; gap: 5px; }
-.doc-legend-glyph { width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: rgba(26, 24, 48, 0.10); color: #1a1830; flex-shrink: 0; }
-.doc-legend-glyph.asleep { background: rgba(61, 90, 147, 0.40); border-radius: 4px; height: 8px; }
-.doc-legend-glyph.feed { background: #a8463f; color: #fff; }
-.doc-legend-glyph.co { background: #3d5a93; color: #fff; }
-.doc-legend-glyph.note { background: #c66a1c; color: #fff; }
-.doc-footer { margin-top: 10px; display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 7.5px; color: rgba(26, 24, 48, 0.5); letter-spacing: 0.08em; text-transform: uppercase; }
+.doc-legend-glyph { width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: rgba(243,234,215,0.08); color: rgba(243,234,215,0.7); flex-shrink: 0; }
+.doc-legend-glyph.asleep { background: rgba(143,165,212,0.45); border-radius: 4px; height: 8px; }
+.doc-legend-glyph.feed { background: #e89a8f; color: #1a0806; }
+.doc-legend-glyph.co { background: #8fa5d4; color: #06101a; }
+.doc-legend-glyph.note { background: #f0b75c; color: #1a0d00; }
+.doc-footer { margin-top: 12px; display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 7.5px; color: rgba(243,234,215,0.25); letter-spacing: 0.10em; text-transform: uppercase; position: relative; }
 .share-preview-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .share-preview-btn { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--text); padding: 13px 12px; border-radius: 14px; cursor: pointer; font-family: inherit; font-size: 13.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s ease, transform 0.15s ease; }
 .share-preview-btn:hover { background: var(--surface-2); }
