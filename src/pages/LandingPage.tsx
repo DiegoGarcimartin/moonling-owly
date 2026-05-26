@@ -103,7 +103,33 @@ function ContactForm() {
   )
 }
 
-function PhoneMockup() {
+// Phases: awake → press → sleeping (+ toast) → sleeping → press → awake → repeat
+const PHASES = [
+  { sleeping: false, pressing: false, toast: false, duration: 2000 },
+  { sleeping: false, pressing: true,  toast: false, duration: 220  },
+  { sleeping: true,  pressing: false, toast: true,  duration: 900  },
+  { sleeping: true,  pressing: false, toast: false, duration: 2200 },
+  { sleeping: true,  pressing: true,  toast: false, duration: 220  },
+  { sleeping: false, pressing: false, toast: false, duration: 460  },
+] as const
+
+function AnimatedPhone() {
+  const [phase, setPhase] = useState(0)
+
+  useEffect(() => {
+    let idx = 0
+    let tid: ReturnType<typeof setTimeout>
+    const step = () => {
+      idx = (idx + 1) % PHASES.length
+      setPhase(idx)
+      tid = setTimeout(step, PHASES[idx].duration)
+    }
+    tid = setTimeout(step, PHASES[0].duration)
+    return () => clearTimeout(tid)
+  }, [])
+
+  const { sleeping, pressing, toast } = PHASES[phase]
+
   return (
     <div className="lp-phone">
       {/* header */}
@@ -111,31 +137,50 @@ function PhoneMockup() {
         <span className="lp-phone-brand">Moonling <em>Owly</em></span>
         <span className="lp-phone-night">noche 3 / 14</span>
       </div>
+
       {/* status */}
       <div className="lp-phone-status">
-        <span className="lp-phone-dot sleeping" />
-        <span>Durmiendo</span>
-        <span className="lp-phone-since">desde las 8:42 PM</span>
+        <span className={`lp-phone-dot ${sleeping ? 'sleeping' : 'awake'}`} />
+        <span style={{ transition: 'opacity 0.2s' }}>
+          {sleeping ? 'Durmiendo' : 'Despierto'}
+        </span>
+        {sleeping && <span className="lp-phone-since">desde las 8:42 PM</span>}
       </div>
-      {/* main button */}
-      <div className="lp-phone-cta">
+
+      {/* main CTA */}
+      <div
+        className={`lp-phone-cta${sleeping ? ' lp-phone-cta--sleeping' : ''}${pressing ? ' lp-phone-cta--pressing' : ''}`}
+      >
         <div className="lp-phone-cta-l">
-          <div className="lp-phone-cta-eyebrow">cuando se despierte</div>
-          <div className="lp-phone-cta-label">Marcar despertar</div>
+          <div className="lp-phone-cta-eyebrow">
+            {sleeping ? 'cuando se despierte' : 'cuando empiece el sueño'}
+          </div>
+          <div className="lp-phone-cta-label">
+            {sleeping ? 'Marcar despertar' : 'Inicio de sueño'}
+          </div>
         </div>
-        <div className="lp-phone-cta-r">↑</div>
+        <div className="lp-phone-cta-r">{sleeping ? '↑' : '↓'}</div>
       </div>
+
       {/* secondary row */}
       <div className="lp-phone-sec">
-        <div className="lp-phone-sec-btn">🍼 Toma</div>
-        <div className="lp-phone-sec-btn">🛏 Colecho</div>
-        <div className="lp-phone-sec-btn">📝 Nota</div>
+        <div className="lp-phone-sec-btn">Toma</div>
+        <div className="lp-phone-sec-btn">Colecho</div>
+        <div className="lp-phone-sec-btn">Nota</div>
       </div>
-      {/* mini strip */}
+
+      {/* strip */}
       <div className="lp-phone-strip">
-        <div className="lp-phone-strip-bar" style={{ left: '20%', width: '38%' }} />
-        <div className="lp-phone-strip-bar" style={{ left: '65%', width: '20%' }} />
+        <div className="lp-phone-strip-bar" style={{ left: '18%', width: '35%' }} />
+        {sleeping && <div className="lp-phone-strip-active" />}
       </div>
+
+      {/* toast */}
+      {toast && (
+        <div className="lp-phone-toast">
+          ↓ Inicio de sueño · 8:42 PM
+        </div>
+      )}
     </div>
   )
 }
@@ -181,7 +226,7 @@ export function LandingPage() {
             </button>
           </div>
           <div className="lp-hero-visual">
-            <PhoneMockup />
+            <AnimatedPhone />
           </div>
         </div>
       </section>
