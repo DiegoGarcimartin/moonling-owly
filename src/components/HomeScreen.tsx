@@ -1,6 +1,6 @@
 import { Icon } from './Icon'
 import { Day, getHours, fmtTrackMin, clockToTrack, fmt12 } from '../data'
-import { nowClockHour } from '../storage'
+import { nowClockHour, nightDate } from '../storage'
 
 interface HomeScreenProps {
   days: Day[]
@@ -17,7 +17,16 @@ interface HomeScreenProps {
 }
 
 export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQuickEvent, onManual, onDeleteEvent, onEditEventNote, onClosePeriod, onHelp }: HomeScreenProps) {
-  const today = days && days.length ? days[days.length - 1] : null
+  // Use *tonight* (the night that's currently active per the wall clock),
+  // not the last day in the array. Otherwise a manual entry made for a
+  // future date pushes the array forward, and the Hoy tab starts showing
+  // a different night than the one the sleep/wake toggle is mutating —
+  // marking the wake-up looked like nothing was happening because the
+  // change landed in a different Day object.
+  const todayDateStr = nightDate(dayStart)
+  const today = (days && days.length)
+    ? (days.find(d => d.date === todayDateStr) || days[days.length - 1])
+    : null
   const HOURS_ARR = getHours(dayStart)
   const dayStartLabel = fmt12(dayStart, 0)
 
