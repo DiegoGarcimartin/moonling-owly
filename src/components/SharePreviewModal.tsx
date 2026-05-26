@@ -34,13 +34,19 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onClose
       const doc = docRef.current
       if (!scaler || !doc) return
       const naturalWidth = DOC_W
-      const containerWidth = scaler.clientWidth
+      // clientWidth includes padding — subtract it so the scaled doc fills
+      // exactly the content area (not the padding area), preventing the right
+      // edge from being clipped by overflow:hidden.
+      const cs = getComputedStyle(scaler)
+      const paddingH = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight)
+      const paddingV = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom)
+      const containerWidth = scaler.clientWidth - paddingH
       const scale = Math.min(1, containerWidth / naturalWidth)
       doc.style.transform = `scale(${scale})`
       doc.style.transformOrigin = 'top left'
       doc.style.width = naturalWidth + 'px'
       requestAnimationFrame(() => {
-        if (scaler && doc) scaler.style.height = (doc.offsetHeight * scale) + 'px'
+        if (scaler && doc) scaler.style.height = (doc.offsetHeight * scale + paddingV) + 'px'
       })
     }
     update()
@@ -114,7 +120,7 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onClose
         <div className="share-preview-head">
           <div style={{ flex: 1, minWidth: 0 }}>
             <h2 className="modal-title">Compartir diario</h2>
-            <p className="modal-sub">Vista previa de la imagen que se compartirá.</p>
+            <p className="modal-sub">La imagen se genera en formato apaisado.</p>
           </div>
           <button className="iconbtn" onClick={onClose} aria-label="Cerrar" style={{ flexShrink: 0 }}>
             <Icon name="close" size={16}/>

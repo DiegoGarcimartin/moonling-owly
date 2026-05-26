@@ -26,13 +26,23 @@ interface Settings {
 
 const SETTINGS_KEY = 'moonling-owly-settings'
 
+const sanitizeField = (s: unknown) => typeof s === 'string' ? s.replace(/[<>]/g, '') : ''
+
 function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY)
     if (raw) {
       const parsed = JSON.parse(raw)
-      // Existing users who already have a name skip onboarding
-      return { ...defaultSettings(), ...parsed, onboardingDone: parsed.onboardingDone ?? !!parsed.childName }
+      // Existing users who already have a name skip onboarding.
+      // Sanitize name/age in case legacy data contains HTML (stored before
+      // the input-level sanitize was added).
+      return {
+        ...defaultSettings(),
+        ...parsed,
+        childName: sanitizeField(parsed.childName),
+        childAge: sanitizeField(parsed.childAge),
+        onboardingDone: parsed.onboardingDone ?? !!parsed.childName,
+      }
     }
   } catch { /* ignore */ }
   return defaultSettings()
