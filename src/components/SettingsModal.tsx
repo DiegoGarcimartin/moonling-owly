@@ -1,5 +1,7 @@
 import { Icon } from './Icon'
 
+const sanitize = (s: string) => s.replace(/[<>]/g, '')
+
 interface AppSettings {
   dayStart: number
   childName: string
@@ -48,7 +50,7 @@ export function SettingsModal({ settings, onChange, onNewJournal, onSignOut, onC
               type="text"
               className="settings-input"
               value={settings.childName}
-              onChange={(e) => onChange({ childName: e.target.value.slice(0, 40) })}
+              onChange={(e) => onChange({ childName: sanitize(e.target.value).slice(0, 40) })}
               maxLength={40}
               placeholder="ej. Lila"
             />
@@ -59,7 +61,7 @@ export function SettingsModal({ settings, onChange, onNewJournal, onSignOut, onC
               type="text"
               className="settings-input"
               value={settings.childAge}
-              onChange={(e) => onChange({ childAge: e.target.value.slice(0, 16) })}
+              onChange={(e) => onChange({ childAge: sanitize(e.target.value).slice(0, 16) })}
               maxLength={16}
               placeholder="ej. 11 m"
             />
