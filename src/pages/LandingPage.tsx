@@ -103,6 +103,43 @@ function ContactForm() {
   )
 }
 
+function PhoneMockup() {
+  return (
+    <div className="lp-phone">
+      {/* header */}
+      <div className="lp-phone-header">
+        <span className="lp-phone-brand">Moonling <em>Owly</em></span>
+        <span className="lp-phone-night">noche 3 / 14</span>
+      </div>
+      {/* status */}
+      <div className="lp-phone-status">
+        <span className="lp-phone-dot sleeping" />
+        <span>Durmiendo</span>
+        <span className="lp-phone-since">desde las 8:42 PM</span>
+      </div>
+      {/* main button */}
+      <div className="lp-phone-cta">
+        <div className="lp-phone-cta-l">
+          <div className="lp-phone-cta-eyebrow">cuando se despierte</div>
+          <div className="lp-phone-cta-label">Marcar despertar</div>
+        </div>
+        <div className="lp-phone-cta-r">↑</div>
+      </div>
+      {/* secondary row */}
+      <div className="lp-phone-sec">
+        <div className="lp-phone-sec-btn">🍼 Toma</div>
+        <div className="lp-phone-sec-btn">🛏 Colecho</div>
+        <div className="lp-phone-sec-btn">📝 Nota</div>
+      </div>
+      {/* mini strip */}
+      <div className="lp-phone-strip">
+        <div className="lp-phone-strip-bar" style={{ left: '20%', width: '38%' }} />
+        <div className="lp-phone-strip-bar" style={{ left: '65%', width: '20%' }} />
+      </div>
+    </div>
+  )
+}
+
 export function LandingPage() {
   const navigate = useNavigate()
 
@@ -128,20 +165,24 @@ export function LandingPage() {
 
       {/* ── Hero — para los padres ────────────────────────────── */}
       <section className="lp-hero">
-        <div className="lp-inner">
-          <p className="lp-eyebrow">diario de sueño</p>
-          <h1 className="lp-hero-title">
-            Una mano.<br />
-            Oscuridad.<br />
-            Bebé en brazos.
-          </h1>
-          <p className="lp-hero-sub">
-            Un toque cuando empieza el sueño. Un toque cuando se despierta.
-            En 14 noches tienes un diario listo para tu pediatra.
-          </p>
-          <button className="lp-hero-cta" onClick={() => navigate('/app')}>
-            Empezar gratis
-          </button>
+        <div className="lp-hero-inner">
+          <div className="lp-hero-text">
+            <p className="lp-eyebrow">diario de sueño</p>
+            <h1 className="lp-hero-title">
+              El diario de sueño<br />
+              para las 3 de la mañana.
+            </h1>
+            <p className="lp-hero-sub">
+              Un toque cuando empieza el sueño. Un toque cuando se despierta.
+              En 14 noches tienes un diario listo para tu pediatra.
+            </p>
+            <button className="lp-hero-cta" onClick={() => navigate('/app')}>
+              Empezar gratis
+            </button>
+          </div>
+          <div className="lp-hero-visual">
+            <PhoneMockup />
+          </div>
         </div>
       </section>
 
