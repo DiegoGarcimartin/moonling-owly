@@ -1035,12 +1035,14 @@ html, body, #root {
   color: #1a1830; letter-spacing: -0.01em;
 }
 .lp-nav-cta {
-  appearance: none; border: 1px solid #c66a1c; background: transparent;
-  color: #c66a1c; padding: 7px 16px; border-radius: 999px;
+  appearance: none; border: none;
+  background: #1a1830; color: #f3ead7;
+  padding: 8px 18px; border-radius: 999px;
   font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 500;
-  cursor: pointer; transition: background 0.18s ease, color 0.18s ease;
+  cursor: pointer; transition: background 0.18s ease, transform 0.12s ease;
 }
-.lp-nav-cta:hover { background: #c66a1c; color: #fff; }
+.lp-nav-cta:hover { background: #2d2a4a; }
+.lp-nav-cta:active { transform: scale(0.97); }
 
 /* Shared layout */
 .lp-inner { max-width: 640px; margin: 0 auto; padding: 0 24px; }
