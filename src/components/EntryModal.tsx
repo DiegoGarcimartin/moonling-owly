@@ -46,6 +46,13 @@ export function EntryModal({ onClose, onSave }: EntryModalProps) {
     return i === 6 ? `hoy ${d.getDate()}` : `${dow} ${d.getDate()}`
   })
 
+  // The day picker only offers past + today, but the time stepper is
+  // unbounded — easy to land in the future and silently log a sleep
+  // that hasn't happened yet.
+  const nowMins = now.getHours() * 60 + now.getMinutes()
+  const pickedMins = hour * 60 + minute
+  const isFuture = dayOffset > 0 || (dayOffset === 0 && pickedMins > nowMins)
+
   return (
     <div className="modal-back" onClick={(e) => { if ((e.target as HTMLElement).classList.contains('modal-back')) onClose() }}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -113,7 +120,30 @@ export function EntryModal({ onClose, onSave }: EntryModalProps) {
           </div>
         )}
 
-        <button className="modal-confirm" onClick={() => onSave({ type, hour, minute, dayOffset, note: note.trim() || undefined })}>Guardar</button>
+        {isFuture && (
+          <div
+            className="mono"
+            style={{
+              fontSize: 11,
+              color: 'var(--accent)',
+              textAlign: 'center',
+              opacity: 0.85,
+              marginBottom: 10,
+              letterSpacing: '0.04em',
+            }}
+          >
+            Esa hora aún no ha pasado.
+          </div>
+        )}
+        <button
+          className="modal-confirm"
+          disabled={isFuture}
+          style={isFuture ? { opacity: 0.45, cursor: 'not-allowed' } : undefined}
+          onClick={() => {
+            if (isFuture) return
+            onSave({ type, hour, minute, dayOffset, note: note.trim() || undefined })
+          }}
+        >Guardar</button>
         <button className="modal-cancel" onClick={onClose}>Cancelar</button>
       </div>
     </div>
