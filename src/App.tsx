@@ -409,17 +409,19 @@ export default function App() {
               {{ feeding: 'Toma', cosleep: 'Colecho', incident: 'Nota' }[editingEvent.kind]}
               <span className="modal-title-sub"> · {fmtTrackMin(editingEvent.t, dayStart)}</span>
             </h2>
-            <textarea
-              className="entry-note"
-              placeholder="Ej: tomó 210 ml, tardó en dormirse…"
-              value={editingEvent.note}
-              onChange={e => setEditingEvent(ev => ev ? { ...ev, note: e.target.value.slice(0, 140) } : null)}
-              rows={3}
-              autoFocus
-            />
-            {editingEvent.note.length > 80 && (
-              <span className="entry-note-count mono">{editingEvent.note.length}/140</span>
-            )}
+            <div className="entry-note-wrap">
+              <textarea
+                className="entry-note"
+                placeholder="Ej: tomó 210 ml, tardó en dormirse…"
+                value={editingEvent.note}
+                onChange={e => setEditingEvent(ev => ev ? { ...ev, note: e.target.value.slice(0, 140) } : null)}
+                rows={3}
+                autoFocus
+              />
+              {editingEvent.note.length > 80 && (
+                <span className="entry-note-count mono">{editingEvent.note.length}/140</span>
+              )}
+            </div>
             <button className="modal-confirm" onClick={handleSaveEditNote}>Guardar</button>
             <button className="modal-cancel" onClick={() => setEditingEvent(null)}>Cancelar</button>
           </div>
