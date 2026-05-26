@@ -23,37 +23,31 @@ function fmtDuration(minutes: number): string {
   return m === 0 ? `${h}h` : `${h}h ${m}m`
 }
 
-function exportText(days: Day[], dayStart: number, childName: string, childAge: string): string {
-  const now = new Date()
-  const header = [
-    'MOONLING OWLY — Diario de sueño',
-    childName ? `Bebé: ${childName}${childAge ? ` · ${childAge}` : ''}` : '',
-    `Exportado: ${fmtDate(now.toISOString().split('T')[0])} ${now.getFullYear()}`,
-    `${days.length} noches registradas`,
-    '',
-    '─'.repeat(40),
-  ].filter(l => l !== null).join('\n')
+function exportCsv(days: Day[], dayStart: number, childName: string, childAge: string): string {
+  const csvEscape = (s: string) => `"${s.replace(/"/g, '""')}"`
 
-  const body = days.map((day, i) => {
-    const sleepTotal = day.sleeps.reduce((s, [a, b]) => s + (b - a), 0)
-    const lines: string[] = [`Noche ${i + 1} · ${day.label} ${day.d} ${MESES[parseInt(day.date.split('-')[1]) - 1]}`]
+  const headers = ['Noche', 'Fecha', 'Inicio sueño', 'Despertar', 'Horas dormido', 'Despertares nocturnos', 'Tomas', 'Colechos', 'Notas']
 
-    for (const [s, e] of day.sleeps) {
-      lines.push(`  ${fmtTrackMin(s, dayStart)} → ${fmtTrackMin(e, dayStart)}  (${fmtDuration(e - s)})`)
-    }
+  const rows = days.map((day, i) => {
+    const firstSleep = day.sleeps[0]
+    const lastSleep = day.sleeps[day.sleeps.length - 1]
+    const sleepStart = firstSleep ? fmtTrackMin(firstSleep[0], dayStart) : ''
+    const wakeTime = lastSleep ? fmtTrackMin(lastSleep[1], dayStart) : ''
+    const totalMin = day.sleeps.reduce((s, [a, b]) => s + (b - a), 0)
+    const horasDormido = totalMin > 0 ? (totalMin / 60).toFixed(1) : ''
+    const despertares = Math.max(0, day.sleeps.length - 1)
+    const tomas = (day.events || []).filter(e => e.type === 'A').length
+    const colechos = (day.events || []).filter(e => e.type === 'C').length
+    const notes = (day.events || [])
+      .filter(e => e.note)
+      .map(e => e.note!)
+      .join(' | ')
+    const dateLabel = `${day.d} ${MESES[parseInt(day.date.split('-')[1]) - 1]}`
+    return [i + 1, dateLabel, sleepStart, wakeTime, horasDormido, despertares, tomas, colechos, csvEscape(notes)].join(',')
+  })
 
-    const eventLabels: Record<string, string> = { A: 'Toma', C: 'Colecho', X: 'Nota' }
-    for (const ev of day.events || []) {
-      const label = eventLabels[ev.type] ?? ev.type
-      const noteStr = ev.note ? `  "${ev.note}"` : ''
-      lines.push(`  ${fmtTrackMin(ev.t, dayStart)} — ${label}${noteStr}`)
-    }
-
-    if (sleepTotal > 0) lines.push(`  Total: ${fmtDuration(sleepTotal)}`)
-    return lines.join('\n')
-  }).join('\n\n')
-
-  return `${header}\n\n${body}\n`
+  const meta = childName ? `# ${childName}${childAge ? ` · ${childAge}` : ''} — Moonling Owly\n` : ''
+  return `${meta}${headers.join(',')}\n${rows.join('\n')}\n`
 }
 
 export function SheetScreen({ days, state, dayStart, childName, childAge, onClosePeriod, onShare }: SheetScreenProps) {
@@ -93,12 +87,12 @@ export function SheetScreen({ days, state, dayStart, childName, childAge, onClos
   const selIdx = selectedRow >= 0 && selectedRow < days.length ? selectedRow : days.length - 1
 
   const handleExport = () => {
-    const text = exportText(days, dayStart, childName, childAge)
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
+    const csv = exportCsv(days, dayStart, childName, childAge)
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `moonling-owly-${lastDate}.txt`
+    a.download = `moonling-owly-${lastDate}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -205,7 +199,7 @@ export function SheetScreen({ days, state, dayStart, childName, childAge, onClos
         </button>
         <button className="export-txt-btn" onClick={handleExport}>
           <span style={{ fontSize: 15 }}>↓</span>
-          <span>Descargar datos (.txt)</span>
+          <span>Descargar tabla (Excel)</span>
         </button>
         {state === 'complete' &&
           <button className="close-period-btn" onClick={onClosePeriod}>
