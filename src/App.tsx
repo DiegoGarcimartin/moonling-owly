@@ -102,6 +102,23 @@ export default function App() {
   // Persiste noches en localStorage como caché offline
   useEffect(() => { save(stored) }, [stored])
 
+  // Mantener pestañas sincronizadas. Otras pestañas de la misma cuenta
+  // disparan 'storage' al escribir en localStorage; cuando llegue ese
+  // evento recargamos el estado en memoria. Sin esto, el padre añade una
+  // toma en su móvil y la madre sigue viendo el diario viejo en el suyo.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === null || e.key === 'moonling-owly-v1') {
+        setStored(load())
+      }
+      if (e.key === null || e.key === SETTINGS_KEY) {
+        setSettings(loadSettings())
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
+
   const patchSettings = useCallback((patch: Partial<Settings>) => {
     setSettings(s => ({ ...s, ...patch }))
   }, [])
