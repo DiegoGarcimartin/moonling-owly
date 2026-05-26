@@ -109,6 +109,9 @@ export function nightsToDays(nights: StoredNight[], dayStart: number): Day[] {
     const dayNum = String(d.getUTCDate()).padStart(2, '0')
     const lastSleep = n.sleeps[n.sleeps.length - 1]
     const inProgress = !!lastSleep && lastSleep.end === null
+    // When the last sleep is still open we need to remember which entry in
+    // `sleeps` is the synthetic "now" one, so the stats helpers can skip it.
+    const openSleepStart = inProgress && sleeps.length > 0 ? sleeps[sleeps.length - 1][0] : undefined
     return {
       d: dayNum,
       label,
@@ -120,6 +123,7 @@ export function nightsToDays(nights: StoredNight[], dayStart: number): Day[] {
         ...(e.note ? { note: e.note } : {}),
       })),
       inProgress,
+      ...(openSleepStart !== undefined ? { openSleepStart } : {}),
     } satisfies Day
   })
 }

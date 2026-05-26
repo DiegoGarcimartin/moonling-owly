@@ -139,7 +139,13 @@ export function SheetScreen({ days, state, dayStart, childName, childAge, onClos
   log.sort((a, b) => a.time.localeCompare(b.time))
 
   const iconFor: Record<string, string> = { sleep_start: 'sleep-start', sleep_end: 'sleep-end', feeding: 'feed', cosleep: 'cosleep', incident: 'note' }
-  const sleepTotal = sel.sleeps.reduce((s, [a, b]) => s + (b - a), 0)
+  // Don't count the in-progress sleep towards the per-night total;
+  // showing e.g. "11h 12m" when half of it is just "still asleep, who knows
+  // when they'll wake up" misleads the pediatrician reading the diary.
+  const sleepTotal = sel.sleeps.reduce((sum, [a, b]) => {
+    if (sel.openSleepStart !== undefined && a === sel.openSleepStart) return sum
+    return sum + (b - a)
+  }, 0)
 
   return (
     <div className="screen-inner">

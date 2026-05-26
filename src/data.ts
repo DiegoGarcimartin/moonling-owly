@@ -17,6 +17,11 @@ export interface Day {
   sleeps: [number, number][] // track minutes
   events: DayEvent[]
   inProgress?: boolean
+  // Track-minutes start of the in-progress sleep, if any. Aggregated stats
+  // (totalSleepHours / nightSleepHours / nightWakeups) ignore this entry so
+  // an open session doesn't inflate hours or fake a wake-up. The visual
+  // bar in Home/Diario still extends to "now" — only the maths skip it.
+  openSleepStart?: number
 }
 
 export function getHours(dayStart = 19): number[] {
@@ -90,16 +95,30 @@ export function buildDays(dayStart = 19): Day[] {
   }))
 }
 
+// Strip the in-progress sleep entry from a day so we don't count "currently
+// sleeping" hours as confirmed sleep. The bar in the UI still draws to "now",
+// but the maths uses only sessions the user has actually closed.
+function sleepsForStats(day: Day): [number, number][] {
+  if (day.openSleepStart === undefined) return day.sleeps
+  let dropped = false
+  return day.sleeps.filter(([s]) => {
+    if (!dropped && s === day.openSleepStart) { dropped = true; return false }
+    return true
+  })
+}
+
 export function totalSleepHours(days: Day[]): number {
   let total = 0
-  for (const d of days) for (const [s, e] of d.sleeps) total += (e - s) / 60
+  for (const d of days) {
+    for (const [s, e] of sleepsForStats(d)) total += (e - s) / 60
+  }
   return total
 }
 
 export function nightSleepHours(day: Day, dayStart = 19): number {
   let total = 0
   const cap = 14 * 60
-  for (const [s, e] of day.sleeps) {
+  for (const [s, e] of sleepsForStats(day)) {
     if (s >= cap) continue
     const b = Math.min(e, cap)
     if (b > s) total += (b - s) / 60
@@ -109,6 +128,6 @@ export function nightSleepHours(day: Day, dayStart = 19): number {
 
 export function nightWakeups(day: Day): number {
   const cap = 14 * 60
-  const nightSleeps = day.sleeps.filter(([s]) => s < cap).sort((a, b) => a[0] - b[0])
+  const nightSleeps = sleepsForStats(day).filter(([s]) => s < cap).sort((a, b) => a[0] - b[0])
   return Math.max(0, nightSleeps.length - 1)
 }
