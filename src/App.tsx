@@ -435,10 +435,10 @@ export default function App() {
           settings={settings}
           onChange={patchSettings}
           onNewJournal={() => {
-            setStored({ nights: [] })
-            if (user) deleteAllNights(user.uid)
+            // Route through the confirmation modal — wiping 14 nights of
+            // clinical data with a single click was the #1 footgun.
             setShowSettings(false)
-            popToast('Diario cerrado · empezando de cero')
+            setShowCloseModal(true)
           }}
           onSignOut={handleSignOut}
           onClose={() => setShowSettings(false)}
