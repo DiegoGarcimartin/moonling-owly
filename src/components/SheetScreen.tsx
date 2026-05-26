@@ -230,7 +230,7 @@ export function SheetScreen({ days, state, dayStart, childName, childAge, onClos
         </button>
         <button className="export-txt-btn" onClick={handleExport}>
           <span style={{ fontSize: 15 }}>↓</span>
-          <span>Descargar tabla (Excel)</span>
+          <span>Descargar tabla (CSV)</span>
         </button>
         {state === 'complete' &&
           <button className="close-period-btn" onClick={onClosePeriod}>
