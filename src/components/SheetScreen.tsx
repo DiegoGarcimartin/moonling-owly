@@ -24,7 +24,15 @@ function fmtDuration(minutes: number): string {
 }
 
 function exportCsvGrid(days: Day[], dayStart: number, childName: string, childAge: string): string {
-  const q = (s: string) => `"${s.replace(/"/g, '""')}"`
+  // CSV injection hardening: a leading =, +, -, @, tab or CR makes spreadsheet
+  // apps treat the cell as a formula (potentially executing system commands
+  // via DDE in Excel). Prefix any such value with a single quote so it stays
+  // visible text but is no longer an active formula.
+  const csvSafe = (s: string) => (/^[=+\-@\t\r]/.test(s) ? "'" + s : s)
+  const q = (s: string) => `"${csvSafe(s).replace(/"/g, '""')}"`
+  // Strip newlines from meta header too — they'd break the leading `#` comment line.
+  const safeName = childName.replace(/[\r\n]+/g, ' ')
+  const safeAge = childAge.replace(/[\r\n]+/g, ' ')
 
   // 24 hour columns from dayStart
   const hours = getHours(dayStart) // e.g. [19,20,21,22,23,24,1,2,...,18]
@@ -59,7 +67,11 @@ function exportCsvGrid(days: Day[], dayStart: number, childName: string, childAg
     return [q(dayLabel), ...cells].join(',')
   })
 
-  const meta = childName ? `# ${childName}${childAge ? ` · ${childAge}` : ''} — Moonling Owly\n` : ''
+  // Sanitize meta too: even though it starts with `#`, Excel ignores the prefix
+  // and parses the rest as a row. Run it through csvSafe so a name like
+  // `=cmd|' /c calc'!A1` cannot fire a formula either.
+  const metaLine = safeName ? `${csvSafe(safeName)}${safeAge ? ` · ${csvSafe(safeAge)}` : ''} — Moonling Owly` : ''
+  const meta = metaLine ? `# ${metaLine}\n` : ''
   return `${meta}${headers.join(',')}\n${rows.join('\n')}\n`
 }
 
