@@ -1036,12 +1036,13 @@ html, body, #root {
 }
 .lp-nav-cta {
   appearance: none; border: none;
-  background: #1a1830; color: #f3ead7;
-  padding: 8px 18px; border-radius: 999px;
-  font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 500;
-  cursor: pointer; transition: background 0.18s ease, transform 0.12s ease;
+  background: #f0b75c; color: #1a1308;
+  padding: 8px 20px; border-radius: 999px;
+  font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: box-shadow 0.18s ease, transform 0.12s ease;
+  box-shadow: 0 2px 8px rgba(240,183,92,0.35);
 }
-.lp-nav-cta:hover { background: #2d2a4a; }
+.lp-nav-cta:hover { box-shadow: 0 4px 14px rgba(240,183,92,0.5); }
 .lp-nav-cta:active { transform: scale(0.97); }
 
 /* Shared layout */
