@@ -106,9 +106,11 @@ function ContactForm() {
 export function LandingPage() {
   const navigate = useNavigate()
 
-  // Force day appearance while on landing (the app may have left data-mode=night)
+  // Force day appearance and reset phone-frame layout while landing is visible
   useEffect(() => {
     document.documentElement.setAttribute('data-mode', 'day')
+    document.body.classList.add('landing')
+    return () => document.body.classList.remove('landing')
   }, [])
 
   return (

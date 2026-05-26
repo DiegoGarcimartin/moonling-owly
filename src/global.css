@@ -751,6 +751,21 @@ html, body, #root {
 .settings-foot .mono { font-size: 10px; letter-spacing: 0.06em; }
 
 /* ============ Desktop phone frame ============ */
+/* Landing page overrides — reset the phone-frame layout so the
+   marketing page scrolls normally on desktop */
+@media (min-width: 640px) {
+  body.landing {
+    display: block !important;
+    overflow-y: auto !important;
+    background: #ffffff !important;
+  }
+  body.landing #root {
+    display: block !important;
+    height: auto !important;
+    min-height: 100% !important;
+  }
+}
+
 @media (min-width: 640px) {
   html, body {
     height: 100%;
