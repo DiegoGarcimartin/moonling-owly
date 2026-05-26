@@ -44,11 +44,25 @@ export function SettingsModal({ settings, onChange, onNewJournal, onSignOut, onC
           <div className="settings-label">Bebé</div>
           <div className="settings-field">
             <label>Nombre</label>
-            <input type="text" className="settings-input" value={settings.childName} onChange={(e) => onChange({ childName: e.target.value })} placeholder="ej. Lila" />
+            <input
+              type="text"
+              className="settings-input"
+              value={settings.childName}
+              onChange={(e) => onChange({ childName: e.target.value.slice(0, 40) })}
+              maxLength={40}
+              placeholder="ej. Lila"
+            />
           </div>
           <div className="settings-field">
             <label>Edad</label>
-            <input type="text" className="settings-input" value={settings.childAge} onChange={(e) => onChange({ childAge: e.target.value })} placeholder="ej. 11 m" />
+            <input
+              type="text"
+              className="settings-input"
+              value={settings.childAge}
+              onChange={(e) => onChange({ childAge: e.target.value.slice(0, 16) })}
+              maxLength={16}
+              placeholder="ej. 11 m"
+            />
           </div>
           <div className="settings-hint">Se muestra en el diario que compartes con tu pediatra.</div>
         </div>

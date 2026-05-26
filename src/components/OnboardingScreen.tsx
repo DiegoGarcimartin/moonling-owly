@@ -33,7 +33,8 @@ export function OnboardingScreen({ onDone }: OnboardingScreenProps) {
               type="text"
               placeholder="ej. Lila"
               value={name}
-              onChange={e => setName(e.target.value)}
+              onChange={e => setName(e.target.value.slice(0, 40))}
+              maxLength={40}
               onKeyDown={e => e.key === 'Enter' && submit()}
               autoFocus
             />
@@ -45,7 +46,8 @@ export function OnboardingScreen({ onDone }: OnboardingScreenProps) {
               type="text"
               placeholder="ej. 11 m"
               value={age}
-              onChange={e => setAge(e.target.value)}
+              onChange={e => setAge(e.target.value.slice(0, 16))}
+              maxLength={16}
               onKeyDown={e => e.key === 'Enter' && submit()}
             />
           </div>
