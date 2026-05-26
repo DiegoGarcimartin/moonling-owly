@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Icon } from './Icon'
 import { SheetGrid } from './SheetGrid'
-import { Day, totalSleepHours, nightSleepHours, nightWakeups, fmtTrackMin } from '../data'
+import { Day, totalSleepHours, nightSleepHours, nightWakeups, fmtTrackMin, getHours, fmt12 } from '../data'
 
 interface SheetScreenProps {
   days: Day[]
@@ -23,27 +23,40 @@ function fmtDuration(minutes: number): string {
   return m === 0 ? `${h}h` : `${h}h ${m}m`
 }
 
-function exportCsv(days: Day[], dayStart: number, childName: string, childAge: string): string {
-  const csvEscape = (s: string) => `"${s.replace(/"/g, '""')}"`
+function exportCsvGrid(days: Day[], dayStart: number, childName: string, childAge: string): string {
+  const q = (s: string) => `"${s.replace(/"/g, '""')}"`
 
-  const headers = ['Noche', 'Fecha', 'Inicio sueño', 'Despertar', 'Horas dormido', 'Despertares nocturnos', 'Tomas', 'Colechos', 'Notas']
+  // 24 hour columns from dayStart
+  const hours = getHours(dayStart) // e.g. [19,20,21,22,23,24,1,2,...,18]
+  const hourLabels = hours.map(h => fmt12(h, 0)) // e.g. "7:00 PM", "12:00 AM"…
 
-  const rows = days.map((day, i) => {
-    const firstSleep = day.sleeps[0]
-    const lastSleep = day.sleeps[day.sleeps.length - 1]
-    const sleepStart = firstSleep ? fmtTrackMin(firstSleep[0], dayStart) : ''
-    const wakeTime = lastSleep ? fmtTrackMin(lastSleep[1], dayStart) : ''
-    const totalMin = day.sleeps.reduce((s, [a, b]) => s + (b - a), 0)
-    const horasDormido = totalMin > 0 ? (totalMin / 60).toFixed(1) : ''
-    const despertares = Math.max(0, day.sleeps.length - 1)
-    const tomas = (day.events || []).filter(e => e.type === 'A').length
-    const colechos = (day.events || []).filter(e => e.type === 'C').length
-    const notes = (day.events || [])
-      .filter(e => e.note)
-      .map(e => e.note!)
-      .join(' | ')
-    const dateLabel = `${day.d} ${MESES[parseInt(day.date.split('-')[1]) - 1]}`
-    return [i + 1, dateLabel, sleepStart, wakeTime, horasDormido, despertares, tomas, colechos, csvEscape(notes)].join(',')
+  const headers = ['Día', ...hourLabels].map(q)
+
+  const rows = days.map(day => {
+    const mes = MESES[parseInt(day.date.split('-')[1]) - 1]
+    const dayLabel = `${day.label.toUpperCase()} ${day.d} ${mes}`
+
+    const cells = hours.map((_, colIdx) => {
+      const cellStart = colIdx * 60
+      const cellEnd = cellStart + 60
+
+      // Is baby sleeping any portion of this hour?
+      const sleeping = day.sleeps.some(([s, e]) => s < cellEnd && e > cellStart)
+
+      // Events in this hour
+      const events = (day.events || []).filter(ev => ev.t >= cellStart && ev.t < cellEnd)
+
+      const parts: string[] = []
+      if (sleeping) parts.push('Z')
+      for (const ev of events) {
+        const name = ev.type === 'A' ? 'Toma' : ev.type === 'C' ? 'Colecho' : 'Nota'
+        parts.push(ev.note ? `${name} (${ev.note})` : name)
+      }
+
+      return q(parts.join(' · '))
+    })
+
+    return [q(dayLabel), ...cells].join(',')
   })
 
   const meta = childName ? `# ${childName}${childAge ? ` · ${childAge}` : ''} — Moonling Owly\n` : ''
@@ -87,7 +100,7 @@ export function SheetScreen({ days, state, dayStart, childName, childAge, onClos
   const selIdx = selectedRow >= 0 && selectedRow < days.length ? selectedRow : days.length - 1
 
   const handleExport = () => {
-    const csv = exportCsv(days, dayStart, childName, childAge)
+    const csv = exportCsvGrid(days, dayStart, childName, childAge)
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')

@@ -4,6 +4,10 @@ import { Icon } from './Icon'
 import { SheetGrid } from './SheetGrid'
 import { Day, fmt12 } from '../data'
 
+// A4 landscape at 96dpi
+const DOC_W = 1122
+const DOC_H = 794
+
 interface SharePreviewModalProps {
   days: Day[]
   dayStart: number
@@ -29,7 +33,7 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onClose
       const scaler = scalerRef.current
       const doc = docRef.current
       if (!scaler || !doc) return
-      const naturalWidth = 880
+      const naturalWidth = DOC_W
       const containerWidth = scaler.clientWidth
       const scale = Math.min(1, containerWidth / naturalWidth)
       doc.style.transform = `scale(${scale})`
@@ -63,7 +67,7 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onClose
 
       const clone = doc.cloneNode(true) as HTMLElement
       clone.style.transform = 'none'
-      clone.style.width = '880px'
+      clone.style.width = `${DOC_W}px`
       clone.style.position = 'fixed'
       clone.style.top = '-9999px'
       clone.style.left = '0'
@@ -76,7 +80,7 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onClose
         useCORS: true,
         backgroundColor: bgColor,
         logging: false,
-        width: 880,
+        width: DOC_W,
       })
 
       document.body.removeChild(clone)
@@ -118,50 +122,35 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onClose
         </div>
 
         <div className="doc-scaler" ref={scalerRef}>
-          <div className="doc" id="printable-doc" ref={docRef}>
+          <div className="doc doc-landscape" id="printable-doc" ref={docRef} style={{ width: DOC_W, minHeight: DOC_H }}>
 
-            {/* Header: brand mark + meta */}
-            <div className="doc-top">
-              <div className="doc-top-brand">Moonling <em>Owly</em></div>
-              <div className="doc-top-meta mono">{dateRange} · {fmt12(dayStart, 0)}</div>
+            {/* Header — una sola línea compacta */}
+            <div className="doc-ls-header">
+              <span className="doc-ls-brand">Moonling <em>Owly</em></span>
+              {childName && <span className="doc-ls-name">{childName}{childAge ? <span className="doc-ls-age"> · {childAge}</span> : null}</span>}
+              <span className="doc-ls-meta mono">{dateRange} · {days.length} {days.length === 1 ? 'noche' : 'noches'}</span>
             </div>
 
-            {/* Hero: child name as emotional center */}
-            <div className="doc-hero">
-              {childName
-                ? <div className="doc-hero-name">{childName}</div>
-                : <div className="doc-hero-name doc-hero-name--empty">diario de sueño</div>
-              }
-              <div className="doc-hero-sub">
-                {[childAge, `${days.length} ${days.length === 1 ? 'noche' : 'noches'}`].filter(Boolean).join(' · ')}
-              </div>
-            </div>
-
-            {/* Divider */}
             <div className="doc-rule" />
 
-            {/* Sleep grid */}
-            <div className="doc-grid">
+            {/* Grid — ocupa la mayor parte del espacio */}
+            <div className="doc-grid doc-grid-ls">
               <SheetGrid days={days} dayStart={dayStart} print={true} />
             </div>
 
-            {/* Divider */}
-            <div className="doc-rule" style={{ marginTop: 10 }} />
+            <div className="doc-rule" style={{ marginTop: 8 }} />
 
-            {/* Legend */}
-            <div className="doc-legend">
-              <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↓</span></span>inicio</span>
-              <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↑</span></span>despertar</span>
-              <span className="doc-legend-item"><span className="doc-legend-glyph asleep"></span>dormido</span>
-              <span className="doc-legend-item"><span className="doc-legend-glyph feed"><Icon name="feed" size={10} stroke={2.4}/></span>toma</span>
-              <span className="doc-legend-item"><span className="doc-legend-glyph co"><Icon name="cosleep" size={10} stroke={2.4}/></span>colecho</span>
-              <span className="doc-legend-item"><span className="doc-legend-glyph note"><Icon name="note" size={10} stroke={2.4}/></span>nota</span>
-            </div>
-
-            {/* Footer */}
-            <div className="doc-footer">
-              <span className="serif-italic">moonling owly</span>
-              <span>moonlingowly.com</span>
+            {/* Pie: leyenda + crédito */}
+            <div className="doc-ls-footer">
+              <div className="doc-legend">
+                <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↓</span></span>inicio</span>
+                <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↑</span></span>despertar</span>
+                <span className="doc-legend-item"><span className="doc-legend-glyph asleep"></span>dormido</span>
+                <span className="doc-legend-item"><span className="doc-legend-glyph feed"><Icon name="feed" size={10} stroke={2.4}/></span>toma</span>
+                <span className="doc-legend-item"><span className="doc-legend-glyph co"><Icon name="cosleep" size={10} stroke={2.4}/></span>colecho</span>
+                <span className="doc-legend-item"><span className="doc-legend-glyph note"><Icon name="note" size={10} stroke={2.4}/></span>nota</span>
+              </div>
+              <span className="serif-italic" style={{ fontSize: 11, color: 'var(--doc-text-mute)' }}>moonling owly</span>
             </div>
 
           </div>

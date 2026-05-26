@@ -26,12 +26,49 @@ export interface StoredState {
 
 const KEY = 'moonling-owly-v1'
 
+// Defensive parse: if the persisted blob is corrupt or has an unexpected shape
+// (older schema, hand-edited, mismatched type) we throw out the bad bits
+// instead of letting the app crash with a white screen.
+function isValidEvent(e: unknown): e is StoredEvent {
+  if (!e || typeof e !== 'object') return false
+  const ev = e as { type?: unknown; h?: unknown; note?: unknown }
+  return (
+    (ev.type === 'A' || ev.type === 'C' || ev.type === 'X') &&
+    typeof ev.h === 'number' && Number.isFinite(ev.h) && ev.h >= 0 && ev.h < 48 &&
+    (ev.note === undefined || typeof ev.note === 'string')
+  )
+}
+
+function isValidSleep(s: unknown): s is StoredSleep {
+  if (!s || typeof s !== 'object') return false
+  const sl = s as { start?: unknown; end?: unknown }
+  if (typeof sl.start !== 'number' || !Number.isFinite(sl.start)) return false
+  if (sl.end !== null && (typeof sl.end !== 'number' || !Number.isFinite(sl.end))) return false
+  return true
+}
+
+function isValidNight(n: unknown): n is StoredNight {
+  if (!n || typeof n !== 'object') return false
+  const night = n as { date?: unknown; sleeps?: unknown; events?: unknown }
+  if (typeof night.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(night.date)) return false
+  if (!Array.isArray(night.sleeps) || !Array.isArray(night.events)) return false
+  return night.sleeps.every(isValidSleep) && night.events.every(isValidEvent)
+}
+
 export function load(): StoredState {
   try {
     const raw = localStorage.getItem(KEY)
-    if (raw) return JSON.parse(raw) as StoredState
-  } catch { /* ignore */ }
-  return { nights: [] }
+    if (!raw) return { nights: [] }
+    const parsed = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object' || !Array.isArray((parsed as { nights?: unknown }).nights)) {
+      return { nights: [] }
+    }
+    // Drop nights that don't match the expected shape rather than blowing up.
+    const validNights = (parsed.nights as unknown[]).filter(isValidNight)
+    return { nights: validNights }
+  } catch {
+    return { nights: [] }
+  }
 }
 
 export function save(state: StoredState) {

@@ -707,6 +707,18 @@ html, body, #root {
 .doc-legend-glyph.note { background: var(--doc-accent); color: #fff; }
 /* Footer */
 .doc-footer { margin-top: 18px; padding-top: 10px; border-top: 1px solid var(--doc-line); display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 7.5px; color: var(--doc-text-mute); letter-spacing: 0.06em; }
+
+/* Landscape A4 doc layout */
+.doc-landscape { display: flex; flex-direction: column; padding: 20px 24px 16px; box-sizing: border-box; }
+.doc-ls-header { display: flex; align-items: baseline; gap: 18px; margin-bottom: 10px; flex-wrap: wrap; }
+.doc-ls-brand { font-family: 'Instrument Serif', serif; font-size: 13px; color: var(--doc-accent); letter-spacing: 0.01em; flex-shrink: 0; }
+.doc-ls-brand em { font-style: italic; }
+.doc-ls-name { font-family: 'Caveat', cursive; font-size: 28px; font-weight: 600; line-height: 1; color: var(--doc-text); letter-spacing: -0.01em; flex-shrink: 0; }
+.doc-ls-age { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--doc-text-mute); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 400; }
+.doc-ls-meta { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: var(--doc-text-mute); letter-spacing: 0.08em; text-transform: uppercase; margin-left: auto; }
+.doc-grid-ls { flex: 1; margin: 10px 0 0; }
+.doc-ls-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+.doc-ls-footer .doc-legend { margin-top: 0; }
 .share-preview-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .share-preview-btn { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--text); padding: 13px 12px; border-radius: 14px; cursor: pointer; font-family: inherit; font-size: 13.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s ease, transform 0.15s ease; }
 .share-preview-btn:hover { background: var(--surface-2); }
