@@ -190,6 +190,14 @@ export default function App() {
     if (user) syncNight(night, user.uid)
 
     popToast(`${labels[type]} · ${fmt12Short(h)}`)
+
+    // For 'Nota' we open the note editor immediately. A note with no text
+    // is useless to the pediatrician — better to nudge the parent to say
+    // what happened ('lloró 30 min', 'tos seca', etc.). They can still
+    // cancel and the event survives unannotated.
+    if (type === 'X') {
+      setEditingEvent({ kind: 'incident', t: clockToTrack(h, dayStart), note: '' })
+    }
   }, [stored.nights, dayStart, popToast, user])
 
   const handleDeleteEvent = useCallback((ev: { kind: string; t: number }) => {
