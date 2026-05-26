@@ -14,7 +14,7 @@ import {
   load, save, nowClockHour, nightDate, nightsToDays, getOrCreateTonight,
   StoredState, StoredNight,
 } from './storage'
-import { EventType, clockToTrack } from './data'
+import { EventType, clockToTrack, fmtTrackMin } from './data'
 
 interface Settings {
   mode: 'night' | 'day'
@@ -61,6 +61,7 @@ export default function App() {
   const [showShare, setShowShare] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [editingEvent, setEditingEvent] = useState<{ kind: string; t: number; note: string } | null>(null)
   const [settings, setSettings] = useState<Settings>(loadSettings)
   const [stored, setStored] = useState<StoredState>(load)
   const [user, setUser] = useState<User | null>(null)
@@ -244,6 +245,33 @@ export default function App() {
     setShowModal(false)
   }, [stored.nights, dayStart, popToast, user])
 
+  const handleSaveEditNote = useCallback(() => {
+    if (!editingEvent) return
+    const today = nightDate(dayStart)
+    const nightsCopy = [...stored.nights]
+    const idx = nightsCopy.findIndex(n => n.date === today)
+    if (idx < 0) return
+    const night = { ...nightsCopy[idx] }
+    const typeMap: Record<string, EventType> = { feeding: 'A', cosleep: 'C', incident: 'X' }
+    const targetType = typeMap[editingEvent.kind]
+    let touched = false
+    night.events = night.events.map(e => {
+      if (!touched && e.type === targetType && Math.round(clockToTrack(e.h, dayStart)) === Math.round(editingEvent.t)) {
+        touched = true
+        const note = editingEvent.note.trim()
+        if (note) return { ...e, note }
+        const { note: _n, ...rest } = e
+        return rest
+      }
+      return e
+    })
+    nightsCopy[idx] = night
+    setStored({ nights: nightsCopy })
+    if (user) syncNight(night, user.uid)
+    setEditingEvent(null)
+    popToast('Nota guardada')
+  }, [editingEvent, stored.nights, dayStart, popToast, user])
+
   const handleClosePeriod = useCallback(() => {
     setShowCloseModal(false)
     setStored({ nights: [] })
@@ -334,6 +362,7 @@ export default function App() {
             onQuickEvent={handleQuickEvent}
             onManual={() => setShowModal(true)}
             onDeleteEvent={handleDeleteEvent}
+            onEditEventNote={ev => setEditingEvent({ kind: ev.kind, t: ev.t, note: ev.note ?? '' })}
             onClosePeriod={() => setShowCloseModal(true)}
             onHelp={() => setShowHelp(true)}
           />
@@ -372,6 +401,30 @@ export default function App() {
         </div>
       )}
 
+      {editingEvent && (
+        <div className="modal-back" onClick={e => { if ((e.target as HTMLElement).classList.contains('modal-back')) setEditingEvent(null) }}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-handle" />
+            <h2 className="modal-title">
+              {{ feeding: 'Toma', cosleep: 'Colecho', incident: 'Nota' }[editingEvent.kind]}
+              <span className="modal-title-sub"> · {fmtTrackMin(editingEvent.t, dayStart)}</span>
+            </h2>
+            <textarea
+              className="entry-note"
+              placeholder="Ej: tomó 210 ml, tardó en dormirse…"
+              value={editingEvent.note}
+              onChange={e => setEditingEvent(ev => ev ? { ...ev, note: e.target.value.slice(0, 140) } : null)}
+              rows={3}
+              autoFocus
+            />
+            {editingEvent.note.length > 80 && (
+              <span className="entry-note-count mono">{editingEvent.note.length}/140</span>
+            )}
+            <button className="modal-confirm" onClick={handleSaveEditNote}>Guardar</button>
+            <button className="modal-cancel" onClick={() => setEditingEvent(null)}>Cancelar</button>
+          </div>
+        </div>
+      )}
       {showModal && <EntryModal onClose={() => setShowModal(false)} onSave={handleManualSave} />}
       {showShare && <SharePreviewModal days={days} dayStart={dayStart} childName={childName} childAge={childAge} onClose={() => setShowShare(false)} />}
       {showHelp && <HelpModal dayStart={dayStart} onClose={() => setShowHelp(false)} />}

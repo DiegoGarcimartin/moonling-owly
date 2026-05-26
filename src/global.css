@@ -623,7 +623,8 @@ html, body, #root {
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .modal { width: 100%; max-width: 430px; background: var(--bg); border-top-left-radius: 28px; border-top-right-radius: 28px; padding: 14px 22px 24px; border-top: 1px solid var(--line); border-left: 1px solid var(--line); border-right: 1px solid var(--line); max-height: 80vh; overflow: auto; animation: slideUp 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); padding-bottom: max(24px, env(safe-area-inset-bottom)); }
 .modal-handle { width: 40px; height: 4px; border-radius: 2px; background: var(--line-strong); margin: 0 auto 14px; }
-.modal-title { font-family: 'Instrument Serif', Georgia, serif; font-size: 26px; line-height: 1.1; margin: 0 0 4px; }
+.modal-title { font-family: 'Instrument Serif', Georgia, serif; font-size: 26px; line-height: 1.1; margin: 0 0 16px; }
+.modal-title-sub { font-family: 'Geist', sans-serif; font-size: 14px; font-weight: 400; color: var(--text-soft); margin-left: 4px; }
 .modal-sub { font-size: 13px; color: var(--text-soft); margin-bottom: 18px; }
 .modal-section-label { font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-mute); margin-bottom: 10px; font-weight: 500; }
 .modal-confirm { width: 100%; appearance: none; border: none; background: var(--accent); color: var(--accent-ink); padding: 16px; border-radius: 16px; cursor: pointer; font-family: inherit; font-size: 15px; font-weight: 500; }
@@ -950,6 +951,9 @@ html, body, #root {
 /* Nota inline en event-row */
 .event-label { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
 .event-note { font-size: 11.5px; color: var(--text-soft); font-style: italic; line-height: 1.35; white-space: pre-wrap; word-break: break-word; }
+.event-note-hint { font-size: 11px; color: var(--text-mute); font-style: italic; }
+.event-row--editable { cursor: pointer; }
+.event-row--editable:active { background: var(--surface); border-radius: 8px; }
 
 /* Campo de nota en EntryModal */
 .entry-note-wrap { position: relative; margin-bottom: 18px; }

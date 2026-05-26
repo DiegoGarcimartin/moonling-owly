@@ -11,11 +11,12 @@ interface HomeScreenProps {
   onQuickEvent: (type: 'A' | 'C' | 'X') => void
   onManual: () => void
   onDeleteEvent: (ev: { kind: string; t: number }) => void
+  onEditEventNote: (ev: { kind: string; t: number; note?: string }) => void
   onClosePeriod: () => void
   onHelp: () => void
 }
 
-export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQuickEvent, onManual, onDeleteEvent, onClosePeriod, onHelp }: HomeScreenProps) {
+export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQuickEvent, onManual, onDeleteEvent, onEditEventNote, onClosePeriod, onHelp }: HomeScreenProps) {
   const today = days && days.length ? days[days.length - 1] : null
   const HOURS_ARR = getHours(dayStart)
   const dayStartLabel = fmt12(dayStart, 0)
@@ -194,15 +195,23 @@ export function HomeScreen({ days, state, sleeping, dayStart, onSleepToggle, onQ
                 : ev.kind === 'sleep_end' ? 'sleep-end'
                 : ev.kind === 'feeding' ? 'feed'
                 : ev.kind === 'cosleep' ? 'cosleep' : 'note'
+              const hasNoteSupport = ev.kind === 'feeding' || ev.kind === 'cosleep' || ev.kind === 'incident'
               return (
-                <div className="event-row" key={i}>
+                <div
+                  className={`event-row${hasNoteSupport ? ' event-row--editable' : ''}`}
+                  key={i}
+                  onClick={hasNoteSupport ? () => onEditEventNote(ev) : undefined}
+                >
                   <span className="event-time mono">{fmtTrackMin(ev.t, dayStart)}</span>
                   <span className={`event-glyph-sm ${ev.kind}`}><Icon name={iconName} size={12} stroke={2.2}/></span>
                   <span className="event-label">
                     {ev.label}
-                    {ev.note && <span className="event-note">{ev.note}</span>}
+                    {ev.note
+                      ? <span className="event-note">{ev.note}</span>
+                      : hasNoteSupport && <span className="event-note-hint">Añadir nota…</span>
+                    }
                   </span>
-                  <button className="event-del" onClick={() => onDeleteEvent(ev)}>×</button>
+                  <button className="event-del" onClick={e => { e.stopPropagation(); onDeleteEvent(ev) }}>×</button>
                 </div>
               )
             })
