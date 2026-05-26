@@ -996,4 +996,172 @@ html, body, #root {
 .onboarding-input::placeholder { color: var(--text-mute); font-style: italic; }
 .onboarding-input:focus { border-color: var(--accent); }
 .onboarding-cta { width: 100%; appearance: none; border: none; background: var(--accent); color: var(--accent-ink); padding: 17px; border-radius: 16px; cursor: pointer; font-family: 'Geist', sans-serif; font-size: 16px; font-weight: 500; transition: transform 0.15s ease, box-shadow 0.2s ease; box-shadow: 0 10px 24px rgba(240,183,92,0.16), inset 0 1px 0 rgba(255,255,255,0.22); }
+
+/* ─── Landing page ───────────────────────────────────────────────────────── */
+/* Hardcoded palette — independent of app day/night mode */
+.lp-root {
+  min-height: 100%;
+  font-family: 'Geist', -apple-system, system-ui, sans-serif;
+  background: #ffffff;
+  color: #1a1830;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Nav */
+.lp-nav {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; height: 56px;
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid #ece9e2;
+}
+.lp-nav-brand {
+  font-family: 'Geist', sans-serif; font-size: 15px; font-weight: 500;
+  color: #1a1830; letter-spacing: -0.01em;
+}
+.lp-nav-cta {
+  appearance: none; border: 1px solid #c66a1c; background: transparent;
+  color: #c66a1c; padding: 7px 16px; border-radius: 999px;
+  font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: background 0.18s ease, color 0.18s ease;
+}
+.lp-nav-cta:hover { background: #c66a1c; color: #fff; }
+
+/* Shared layout */
+.lp-inner { max-width: 640px; margin: 0 auto; padding: 0 24px; }
+.lp-eyebrow {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: #c66a1c; margin: 0 0 18px;
+}
+.lp-section-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: #c66a1c; margin: 0 0 16px;
+}
+
+/* Hero */
+.lp-hero { background: #0e1228; padding: 80px 0 72px; }
+.lp-hero-title {
+  font-family: 'Instrument Serif', Georgia, serif; font-style: italic;
+  font-size: clamp(42px, 10vw, 64px); line-height: 1.05;
+  color: #f3ead7; margin: 0 0 24px; font-weight: 400; letter-spacing: -0.02em;
+}
+.lp-hero-sub {
+  font-size: 16px; line-height: 1.65; color: rgba(243,234,215,0.72);
+  margin: 0 0 40px; max-width: 440px;
+}
+.lp-hero-cta {
+  appearance: none; border: none;
+  background: #f0b75c; color: #1a1308;
+  padding: 16px 36px; border-radius: 999px;
+  font-family: 'Geist', sans-serif; font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 24px rgba(240,183,92,0.28);
+}
+.lp-hero-cta:hover { transform: translateY(-1px); box-shadow: 0 12px 32px rgba(240,183,92,0.38); }
+.lp-hero-cta:active { transform: translateY(0); }
+
+/* Sections */
+.lp-section { padding: 80px 0; }
+.lp-section--light { background: #ffffff; }
+.lp-section--warm  { background: #faf7f2; }
+.lp-section--dark  { background: #0e1228; }
+
+.lp-section-title {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(30px, 6vw, 42px); line-height: 1.1; font-weight: 400;
+  color: #1a1830; margin: 0 0 20px; letter-spacing: -0.015em;
+}
+.lp-section--dark .lp-section-title { color: #f3ead7; }
+
+.lp-section-body {
+  font-size: 15px; line-height: 1.65; color: #52506a; margin: 0 0 36px;
+  max-width: 480px;
+}
+.lp-section--dark .lp-section-body { color: rgba(243,234,215,0.65); }
+
+/* Grid demo */
+.lp-grid-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.lp-grid-demo {
+  min-width: 560px; background: #faf8f4;
+  border: 1px solid #ddd9cf; border-radius: 8px; padding: 16px;
+}
+.lp-grid-caption {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: 0.08em; color: #9b98b0; text-transform: uppercase;
+  margin: 10px 0 0; text-align: right;
+}
+
+/* Contact form */
+.lp-form { display: flex; flex-direction: column; gap: 16px; }
+.lp-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 500px) { .lp-form-row { grid-template-columns: 1fr; } }
+.lp-form-field { display: flex; flex-direction: column; gap: 6px; }
+.lp-form-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: 0.08em; text-transform: uppercase; color: #6b6880;
+}
+.lp-form-input, .lp-form-select, .lp-form-textarea {
+  appearance: none; background: #ffffff; border: 1px solid #ddd9cf;
+  color: #1a1830; font-family: 'Geist', sans-serif; font-size: 14px;
+  padding: 10px 12px; border-radius: 10px; outline: none; width: 100%;
+  box-sizing: border-box; transition: border-color 0.18s ease;
+}
+.lp-form-input:focus, .lp-form-select:focus, .lp-form-textarea:focus {
+  border-color: #c66a1c;
+}
+.lp-form-textarea { resize: vertical; min-height: 80px; }
+.lp-form-submit {
+  appearance: none; border: none; background: #1a1830; color: #f3ead7;
+  padding: 14px 28px; border-radius: 12px; font-family: 'Geist', sans-serif;
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  align-self: flex-start;
+  transition: background 0.18s ease, transform 0.12s ease;
+}
+.lp-form-submit:hover { background: #2d2a4a; }
+.lp-form-submit:disabled { opacity: 0.5; cursor: default; }
+.lp-form-error { font-size: 13px; color: #a8463f; margin: 0; }
+.lp-form-done {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+  padding: 24px; background: #f0f9f0; border: 1px solid #b0d9b0;
+  border-radius: 12px;
+}
+.lp-form-done-icon { font-size: 22px; color: #2e7d32; }
+.lp-form-done-msg { font-size: 15px; color: #1a4a1a; margin: 0; }
+
+/* Manifesto */
+.lp-manifesto-title {
+  font-family: 'Instrument Serif', Georgia, serif; font-style: normal;
+  font-size: clamp(28px, 6vw, 40px); line-height: 1.1; font-weight: 400;
+  color: #f3ead7; margin: 0 0 36px; letter-spacing: -0.015em;
+}
+.lp-manifesto-list {
+  list-style: none; padding: 0; margin: 0 0 48px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.lp-manifesto-list li {
+  font-size: 16px; line-height: 1.5; color: rgba(243,234,215,0.82);
+  padding-left: 20px; position: relative;
+}
+.lp-manifesto-list li::before {
+  content: '—'; position: absolute; left: 0;
+  color: #f0b75c; font-size: 14px;
+}
+.lp-manifesto-cta {
+  appearance: none; border: 1px solid rgba(243,234,215,0.30);
+  background: transparent; color: #f3ead7;
+  padding: 13px 28px; border-radius: 999px;
+  font-family: 'Geist', sans-serif; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: border-color 0.18s ease, background 0.18s ease;
+}
+.lp-manifesto-cta:hover { border-color: rgba(243,234,215,0.6); background: rgba(243,234,215,0.06); }
+
+/* Footer */
+.lp-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px; border-top: 1px solid #ece9e2;
+  font-size: 13px; color: #9b98b0;
+}
+.lp-footer-v { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
 .onboarding-cta:active { transform: scale(0.98); }
