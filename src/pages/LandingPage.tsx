@@ -103,84 +103,150 @@ function ContactForm() {
   )
 }
 
-// Phases: awake → press → sleeping (+ toast) → sleeping → press → awake → repeat
-const PHASES = [
-  { sleeping: false, pressing: false, toast: false, duration: 2000 },
-  { sleeping: false, pressing: true,  toast: false, duration: 220  },
-  { sleeping: true,  pressing: false, toast: true,  duration: 900  },
-  { sleeping: true,  pressing: false, toast: false, duration: 2200 },
-  { sleeping: true,  pressing: true,  toast: false, duration: 220  },
-  { sleeping: false, pressing: false, toast: false, duration: 460  },
+// Nights for the actogram demo (track minutes from dayStart=19 / 7 PM)
+// 0 = 7 PM · 60 = 8 PM · 300 = 12 AM · 540 = 4 AM · 720 = 7 AM
+const ACTO_NIGHTS = [
+  { label: 'L 12', sleeps: [[75,360],[375,600]] as [number,number][] },
+  { label: 'M 13', sleeps: [[60,330],[345,420],[435,630]] as [number,number][] },
+  { label: 'X 14', sleeps: [[90,600]] as [number,number][] },
+  { label: 'J 15', sleeps: [[45,270],[330,540],[555,660]] as [number,number][] },
+  { label: 'V 16', sleeps: [[60,510],[525,690]] as [number,number][] },
+  { label: 'S 17', sleeps: [[75,465],[480,645]] as [number,number][] },
+  { label: 'D 18', sleeps: [[60,660]] as [number,number][] },
+  { label: 'L 19', sleeps: [[75,390],[405,615]] as [number,number][] },
+]
+
+// Phases: awake → tap → toast → sleeping → tap → toast → event log → slide → actogram
+const DP = [
+  { id: 'awake',    dur: 2200 },
+  { id: 'tap1',     dur: 185  },
+  { id: 'toast_s',  dur: 860  },
+  { id: 'sleeping', dur: 2700 },
+  { id: 'tap2',     dur: 185  },
+  { id: 'toast_w',  dur: 860  },
+  { id: 'logged',   dur: 1600 },
+  { id: 'swipe',    dur: 480  },
+  { id: 'diary',    dur: 4200 },
 ] as const
+type DPId = typeof DP[number]['id']
 
 function AnimatedPhone() {
-  const [phase, setPhase] = useState(0)
+  const [idx, setIdx] = useState(0)
 
   useEffect(() => {
-    let idx = 0
+    let i = 0
     let tid: ReturnType<typeof setTimeout>
     const step = () => {
-      idx = (idx + 1) % PHASES.length
-      setPhase(idx)
-      tid = setTimeout(step, PHASES[idx].duration)
+      i = (i + 1) % DP.length
+      setIdx(i)
+      tid = setTimeout(step, DP[i].dur)
     }
-    tid = setTimeout(step, PHASES[0].duration)
+    tid = setTimeout(step, DP[0].dur)
     return () => clearTimeout(tid)
   }, [])
 
-  const { sleeping, pressing, toast } = PHASES[phase]
+  const phase    = DP[idx].id as DPId
+  const sleeping = ['sleeping','tap2','toast_w','logged'].includes(phase)
+  const tapping  = phase === 'tap1' || phase === 'tap2'
+  const isToast  = phase === 'toast_s' || phase === 'toast_w'
+  const isDiary  = phase === 'swipe' || phase === 'diary'
+  const events   = phase === 'logged'
+  const toast    = phase === 'toast_s' ? '↓  Inicio de sueño · 8:15 PM' : '↑  Despertar · 11:42 PM'
 
   return (
-    <div className="lp-phone">
+    <div className="dp-frame">
+      {/* dynamic island */}
+      <div className="dp-island" />
+
       {/* header */}
-      <div className="lp-phone-header">
-        <span className="lp-phone-brand">Moonling <em>Owly</em></span>
-        <span className="lp-phone-night">noche 3 / 14</span>
+      <div className="dp-topbar">
+        <span className="dp-brand">Moonling <em>Owly</em></span>
+        <span className="dp-meta">noche <b>8</b> / 14</span>
       </div>
 
-      {/* status */}
-      <div className="lp-phone-status">
-        <span className={`lp-phone-dot ${sleeping ? 'sleeping' : 'awake'}`} />
-        <span style={{ transition: 'opacity 0.2s' }}>
-          {sleeping ? 'Durmiendo' : 'Despierto'}
-        </span>
-        {sleeping && <span className="lp-phone-since">desde las 8:42 PM</span>}
+      {/* tabs */}
+      <div className="dp-tabs">
+        <span className={`dp-tab${!isDiary ? ' active' : ''}`}>Hoy</span>
+        <span className={`dp-tab${isDiary ? ' active' : ''}`}>Diario</span>
       </div>
 
-      {/* main CTA */}
-      <div
-        className={`lp-phone-cta${sleeping ? ' lp-phone-cta--sleeping' : ''}${pressing ? ' lp-phone-cta--pressing' : ''}`}
-      >
-        <div className="lp-phone-cta-l">
-          <div className="lp-phone-cta-eyebrow">
-            {sleeping ? 'cuando se despierte' : 'cuando empiece el sueño'}
+      {/* screens */}
+      <div className="dp-screens">
+
+        {/* HOME */}
+        <div className={`dp-home${isDiary ? ' dp-home--out' : ''}`}>
+          <div className="dp-status">
+            <span className={`dp-dot ${sleeping ? 'sleeping' : 'awake'}`} />
+            <span className="dp-status-text">{sleeping ? 'Durmiendo' : 'Despierto'}</span>
+            {sleeping && <span className="dp-since">desde las 8:15 PM</span>}
           </div>
-          <div className="lp-phone-cta-label">
-            {sleeping ? 'Marcar despertar' : 'Inicio de sueño'}
+
+          <div className={`dp-cta${sleeping ? ' sleeping' : ''}${tapping ? ' pressing' : ''}`}>
+            <div className="dp-cta-body">
+              <div className="dp-eyebrow">{sleeping ? 'cuando se despierte' : 'cuando empiece el sueño'}</div>
+              <div className="dp-label">{sleeping ? 'Marcar despertar' : 'Inicio de sueño'}</div>
+            </div>
+            <div className="dp-arrow">{sleeping ? '↑' : '↓'}</div>
+          </div>
+
+          <div className="dp-sec">
+            <span className="dp-sec-item">Toma</span>
+            <span className="dp-sec-item">Colecho</span>
+            <span className="dp-sec-item">Nota</span>
+          </div>
+
+          {events ? (
+            <div className="dp-events">
+              <div className="dp-ev">
+                <span className="dp-ev-time">8:15 PM</span>
+                <span className="dp-ev-lbl">↓ Inicio de sueño</span>
+              </div>
+              <div className="dp-ev">
+                <span className="dp-ev-time">11:42 PM</span>
+                <span className="dp-ev-lbl">↑ Despertar</span>
+              </div>
+            </div>
+          ) : (
+            <div className="dp-strip">
+              <div className="dp-strip-bar" style={{ left: '18%', width: '25%' }} />
+              {sleeping && <div className="dp-strip-pulse" />}
+            </div>
+          )}
+        </div>
+
+        {/* DIARY */}
+        <div className={`dp-diary${isDiary ? ' dp-diary--in' : ''}`}>
+          <div className="dp-diary-label">8 noches · diario listo</div>
+          <div className="dp-acto">
+            {ACTO_NIGHTS.map((n, i) => (
+              <div key={i} className="dp-acto-row">
+                <span className="dp-acto-day">{n.label}</span>
+                <div className="dp-acto-track">
+                  {n.sleeps.map(([s, e], j) => (
+                    <div
+                      key={j}
+                      className="dp-acto-bar"
+                      style={{
+                        left:  `${(s / 720) * 100}%`,
+                        width: `${((Math.min(e, 720) - s) / 720) * 100}%`,
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+            <div className="dp-acto-ruler">
+              <span>7 PM</span>
+              <span>12 AM</span>
+              <span>7 AM</span>
+            </div>
           </div>
         </div>
-        <div className="lp-phone-cta-r">{sleeping ? '↑' : '↓'}</div>
-      </div>
 
-      {/* secondary row */}
-      <div className="lp-phone-sec">
-        <div className="lp-phone-sec-btn">Toma</div>
-        <div className="lp-phone-sec-btn">Colecho</div>
-        <div className="lp-phone-sec-btn">Nota</div>
-      </div>
-
-      {/* strip */}
-      <div className="lp-phone-strip">
-        <div className="lp-phone-strip-bar" style={{ left: '18%', width: '35%' }} />
-        {sleeping && <div className="lp-phone-strip-active" />}
       </div>
 
       {/* toast */}
-      {toast && (
-        <div className="lp-phone-toast">
-          ↓ Inicio de sueño · 8:42 PM
-        </div>
-      )}
+      {isToast && <div key={phase} className="dp-toast">{toast}</div>}
     </div>
   )
 }
