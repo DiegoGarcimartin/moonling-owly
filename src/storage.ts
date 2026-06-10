@@ -90,9 +90,33 @@ export function nightDate(dayStart: number): string {
   return d.toISOString().split('T')[0]
 }
 
-// Convert StoredNight[] → Day[] for the grid/timeline components
+// Convert StoredNight[] → Day[] for the grid/timeline components.
+// Skipped nights are filled with empty Day entries so the calendar numbering
+// is always based on elapsed calendar days, not just the count of recorded
+// nights. This also means retroactive entries for a missed night slot in
+// at the correct position automatically.
 export function nightsToDays(nights: StoredNight[], dayStart: number): Day[] {
-  return nights.map(n => {
+  if (nights.length === 0) return []
+
+  // Sort by date so gaps are detected correctly and out-of-order manual
+  // entries (retroactive additions) land in the right position.
+  const sorted = [...nights].sort((a, b) => a.date.localeCompare(b.date))
+
+  const nightMap = new Map(sorted.map(n => [n.date, n]))
+  const firstDate = sorted[0].date
+  const lastDate = sorted[sorted.length - 1].date
+
+  // Walk the full date range and insert an empty night for every skipped day.
+  const allNights: StoredNight[] = []
+  const cur = new Date(firstDate + 'T12:00:00Z')
+  const last = new Date(lastDate + 'T12:00:00Z')
+  while (cur <= last) {
+    const dateStr = cur.toISOString().split('T')[0]
+    allNights.push(nightMap.get(dateStr) ?? { date: dateStr, sleeps: [], events: [] })
+    cur.setUTCDate(cur.getUTCDate() + 1)
+  }
+
+  return allNights.map(n => {
     const sleeps: [number, number][] = []
     for (const s of n.sleeps) {
       const start = clockToTrack(s.start, dayStart)

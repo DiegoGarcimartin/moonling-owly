@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { t } from '../lib/i18n'
 
 interface OnboardingScreenProps {
   onDone: (childName: string, childAge: string) => void
@@ -20,20 +21,17 @@ export function OnboardingScreen({ onDone }: OnboardingScreenProps) {
         </div>
 
         <div className="onboarding-hero">
-          <h1 className="onboarding-title">El diario de sueño<br />más simple.</h1>
-          <p className="onboarding-sub">
-            Pulsa cuando empieza el sueño, pulsa cuando se despierta.
-            En 14 noches tienes un diario listo para tu pediatra.
-          </p>
+          <h1 className="onboarding-title">{t.onboardingTitle1}<br />{t.onboardingTitle2}</h1>
+          <p className="onboarding-sub">{t.onboardingSub}</p>
         </div>
 
         <div className="onboarding-fields">
           <div className="onboarding-field">
-            <label className="onboarding-label">¿Cómo se llama?</label>
+            <label className="onboarding-label">{t.onboardingNameLabel}</label>
             <input
               className="onboarding-input"
               type="text"
-              placeholder="ej. Lila"
+              placeholder={t.egName}
               value={name}
               onChange={e => setName(sanitize(e.target.value).slice(0, 40))}
               maxLength={40}
@@ -42,11 +40,11 @@ export function OnboardingScreen({ onDone }: OnboardingScreenProps) {
             />
           </div>
           <div className="onboarding-field">
-            <label className="onboarding-label">¿Cuántos meses tiene? <span className="onboarding-optional">opcional</span></label>
+            <label className="onboarding-label">{t.onboardingAgeLabel} <span className="onboarding-optional">{t.optional}</span></label>
             <input
               className="onboarding-input"
               type="text"
-              placeholder="ej. 11 m"
+              placeholder={t.egAge}
               value={age}
               onChange={e => setAge(sanitize(e.target.value).slice(0, 16))}
               maxLength={16}
@@ -56,7 +54,7 @@ export function OnboardingScreen({ onDone }: OnboardingScreenProps) {
         </div>
 
         <button className="onboarding-cta" onClick={submit}>
-          Empezar
+          {t.onboardingCta}
         </button>
       </div>
     </div>

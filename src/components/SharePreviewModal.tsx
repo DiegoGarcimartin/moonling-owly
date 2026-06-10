@@ -3,6 +3,7 @@ import html2canvas from 'html2canvas'
 import { Icon } from './Icon'
 import { SheetGrid } from './SheetGrid'
 import { Day, fmt12 } from '../data'
+import { t, MONTHS } from '../lib/i18n'
 
 // A4 landscape at 96dpi
 const DOC_W = 1122
@@ -21,7 +22,7 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onClose
   const docRef = useRef<HTMLDivElement>(null)
   const [capturing, setCapturing] = useState(false)
 
-  const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
+  const MESES = MONTHS
   const firstDate = days.length ? new Date(days[0].date) : new Date()
   const lastDate = days.length ? new Date(days[days.length - 1].date) : new Date()
   const dateRange = days.length > 1
@@ -97,7 +98,7 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onClose
       const file = new File([blob], 'moonling-owly.png', { type: 'image/png' })
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: childName ? `${childName} — diario de sueño` : 'Diario de sueño' })
+        await navigator.share({ files: [file], title: t.shareFileTitle(childName) })
       } else {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
@@ -119,10 +120,10 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onClose
         <div className="modal-handle" />
         <div className="share-preview-head">
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h2 className="modal-title">Compartir diario</h2>
-            <p className="modal-sub">La imagen se genera en formato apaisado.</p>
+            <h2 className="modal-title">{t.shareDiaryTitle}</h2>
+            <p className="modal-sub">{t.shareDiarySub}</p>
           </div>
-          <button className="iconbtn" onClick={onClose} aria-label="Cerrar" style={{ flexShrink: 0 }}>
+          <button className="iconbtn" onClick={onClose} aria-label={t.ariaClose} style={{ flexShrink: 0 }}>
             <Icon name="close" size={16}/>
           </button>
         </div>
@@ -134,7 +135,7 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onClose
             <div className="doc-ls-header">
               <span className="doc-ls-brand">Moonling <em>Owly</em></span>
               {childName && <span className="doc-ls-name">{childName}{childAge ? <span className="doc-ls-age"> · {childAge}</span> : null}</span>}
-              <span className="doc-ls-meta mono">{dateRange} · {days.length} {days.length === 1 ? 'noche' : 'noches'}</span>
+              <span className="doc-ls-meta mono">{dateRange} · {days.length} {t.dayWord(days.length)}</span>
             </div>
 
             <div className="doc-rule" />
@@ -149,12 +150,12 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onClose
             {/* Pie: leyenda + crédito */}
             <div className="doc-ls-footer">
               <div className="doc-legend">
-                <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↓</span></span>inicio</span>
-                <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↑</span></span>despertar</span>
-                <span className="doc-legend-item"><span className="doc-legend-glyph asleep"></span>dormido</span>
-                <span className="doc-legend-item"><span className="doc-legend-glyph feed"><Icon name="feed" size={10} stroke={2.4}/></span>toma</span>
-                <span className="doc-legend-item"><span className="doc-legend-glyph co"><Icon name="cosleep" size={10} stroke={2.4}/></span>colecho</span>
-                <span className="doc-legend-item"><span className="doc-legend-glyph note"><Icon name="note" size={10} stroke={2.4}/></span>nota</span>
+                <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↓</span></span>{t.legendStart}</span>
+                <span className="doc-legend-item"><span className="doc-legend-glyph"><span style={{fontSize: 13, lineHeight: '1'}}>↑</span></span>{t.legendWake}</span>
+                <span className="doc-legend-item"><span className="doc-legend-glyph asleep"></span>{t.legendAsleep}</span>
+                <span className="doc-legend-item"><span className="doc-legend-glyph feed"><Icon name="feed" size={10} stroke={2.4}/></span>{t.legendFeed}</span>
+                <span className="doc-legend-item"><span className="doc-legend-glyph co"><Icon name="cosleep" size={10} stroke={2.4}/></span>{t.legendCosleep}</span>
+                <span className="doc-legend-item"><span className="doc-legend-glyph note"><Icon name="note" size={10} stroke={2.4}/></span>{t.legendNote}</span>
               </div>
               <span className="serif-italic" style={{ fontSize: 11, color: 'var(--doc-text-mute)' }}>moonling owly</span>
             </div>
@@ -164,10 +165,10 @@ export function SharePreviewModal({ days, dayStart, childName, childAge, onClose
 
         <div className="share-preview-actions">
           <button className="share-preview-btn primary" onClick={captureAndShare} disabled={capturing}>
-            <Icon name="share" size={16}/><span>{capturing ? 'Generando…' : 'Compartir imagen'}</span>
+            <Icon name="share" size={16}/><span>{capturing ? t.generating : t.shareImage}</span>
           </button>
           <button className="share-preview-btn" onClick={() => window.print()}>
-            <span style={{ fontSize: 16, lineHeight: '1' }}>⎙</span><span>Guardar PDF</span>
+            <span style={{ fontSize: 16, lineHeight: '1' }}>⎙</span><span>{t.savePdf}</span>
           </button>
         </div>
       </div>

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '../lib/firebase'
+import { track } from '../lib/analytics'
+import { t } from '../lib/i18n'
 
 function BrandMark({ size = 28 }: { size?: number }) {
   return (
@@ -28,21 +30,23 @@ export function AuthScreen() {
     try {
       if (mode === 'login') {
         await signInWithEmailAndPassword(auth, email, password)
+        track('signed_in')
       } else {
         await createUserWithEmailAndPassword(auth, email, password)
+        track('signed_up')
       }
     } catch (e: unknown) {
       const code = (e as { code?: string }).code
       if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
-        setError('Email o contraseña incorrectos')
+        setError(t.errWrongCredentials)
       } else if (code === 'auth/email-already-in-use') {
-        setError('Ya existe una cuenta con ese email')
+        setError(t.errEmailInUse)
       } else if (code === 'auth/weak-password') {
-        setError('La contraseña debe tener al menos 6 caracteres')
+        setError(t.errWeakPassword)
       } else if (code === 'auth/invalid-email') {
-        setError('Email no válido')
+        setError(t.errInvalidEmail)
       } else {
-        setError('Algo ha ido mal. Inténtalo de nuevo.')
+        setError(t.errGeneric)
       }
     }
     setLoading(false)
@@ -60,19 +64,17 @@ export function AuthScreen() {
 
       <div className="auth-card">
         <h2 className="auth-title">
-          {mode === 'login' ? 'Acceder' : 'Crear cuenta'}
+          {mode === 'login' ? t.authLogin : t.authRegister}
         </h2>
         <p className="auth-sub">
-          {mode === 'login'
-            ? 'Los dos podéis usar el mismo email y contraseña.'
-            : 'Una cuenta por familia. Los dos entráis con las mismas credenciales.'}
+          {mode === 'login' ? t.authLoginSub : t.authRegisterSub}
         </p>
 
         <div className="auth-fields">
           <input
             className="auth-input"
             type="email"
-            placeholder="Email"
+            placeholder={t.email}
             value={email}
             onChange={e => setEmail(e.target.value)}
             onKeyDown={onKey}
@@ -82,7 +84,7 @@ export function AuthScreen() {
           <input
             className="auth-input"
             type="password"
-            placeholder="Contraseña"
+            placeholder={t.password}
             value={password}
             onChange={e => setPassword(e.target.value)}
             onKeyDown={onKey}
@@ -93,11 +95,11 @@ export function AuthScreen() {
         {error && <div className="auth-error">{error}</div>}
 
         <button className="auth-submit" onClick={submit} disabled={loading || !email || !password}>
-          {loading ? '…' : mode === 'login' ? 'Entrar' : 'Crear cuenta'}
+          {loading ? '…' : mode === 'login' ? t.authSubmitLogin : t.authSubmitRegister}
         </button>
 
         <button className="auth-toggle" onClick={() => { setMode(m => m === 'login' ? 'register' : 'login'); setError(null) }}>
-          {mode === 'login' ? '¿Primera vez? Crea una cuenta' : '¿Ya tienes cuenta? Acceder'}
+          {mode === 'login' ? t.authToggleToRegister : t.authToggleToLogin}
         </button>
       </div>
     </div>

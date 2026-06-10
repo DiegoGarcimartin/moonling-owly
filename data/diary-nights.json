@@ -1,0 +1,72 @@
+[
+  {
+    "date": "2026-05-25",
+    "sleeps": [{"start": 21, "end": 31}, {"start": 10, "end": 11}, {"start": 13, "end": 15}],
+    "events": [{"type": "A", "h": 20.5}, {"type": "A", "h": 24}, {"type": "A", "h": 31.5}]
+  },
+  {
+    "date": "2026-05-26",
+    "sleeps": [{"start": 21, "end": 31}, {"start": 9, "end": 10}, {"start": 13, "end": 14}],
+    "events": [{"type": "A", "h": 20.5}, {"type": "C", "h": 26}, {"type": "X", "h": 28}, {"type": "A", "h": 31.5}]
+  },
+  {
+    "date": "2026-05-27",
+    "sleeps": [{"start": 21, "end": 30}, {"start": 10, "end": 11}, {"start": 13, "end": 14}],
+    "events": [{"type": "A", "h": 20.5}, {"type": "A", "h": 25}, {"type": "X", "h": 28}, {"type": "A", "h": 30.5}]
+  },
+  {
+    "date": "2026-05-28",
+    "sleeps": [{"start": 21, "end": 31}, {"start": 9, "end": 11}, {"start": 14, "end": 15}],
+    "events": [{"type": "A", "h": 20.5}, {"type": "C", "h": 26}, {"type": "A", "h": 31.5}]
+  },
+  {
+    "date": "2026-05-29",
+    "sleeps": [{"start": 22, "end": 31}, {"start": 10, "end": 11}, {"start": 13, "end": 15}],
+    "events": [{"type": "A", "h": 21.5}, {"type": "X", "h": 25}, {"type": "A", "h": 27}, {"type": "A", "h": 31.5}]
+  },
+  {
+    "date": "2026-05-30",
+    "sleeps": [{"start": 22, "end": 32}, {"start": 10, "end": 11}, {"start": 14, "end": 15}],
+    "events": [{"type": "A", "h": 21.5}, {"type": "C", "h": 28}, {"type": "A", "h": 32.5}]
+  },
+  {
+    "date": "2026-05-31",
+    "sleeps": [{"start": 22, "end": 31}, {"start": 10, "end": 12}, {"start": 14, "end": 15}],
+    "events": [{"type": "A", "h": 21.5}, {"type": "A", "h": 27}, {"type": "X", "h": 29}, {"type": "A", "h": 31.5}]
+  },
+  {
+    "date": "2026-06-01",
+    "sleeps": [{"start": 21, "end": 31}, {"start": 9, "end": 10}, {"start": 13, "end": 14}],
+    "events": [{"type": "A", "h": 20.5}, {"type": "A", "h": 26}, {"type": "X", "h": 29}, {"type": "A", "h": 31.5}]
+  },
+  {
+    "date": "2026-06-02",
+    "sleeps": [{"start": 21, "end": 31}, {"start": 9, "end": 11}, {"start": 13, "end": 14}],
+    "events": [{"type": "A", "h": 20.5}, {"type": "C", "h": 24}, {"type": "A", "h": 31.5}]
+  },
+  {
+    "date": "2026-06-03",
+    "sleeps": [{"start": 21, "end": 31}, {"start": 10, "end": 11}, {"start": 13, "end": 15}],
+    "events": [{"type": "A", "h": 20.5}, {"type": "A", "h": 26}, {"type": "C", "h": 29}, {"type": "A", "h": 31.5}]
+  },
+  {
+    "date": "2026-06-04",
+    "sleeps": [{"start": 21, "end": 30}, {"start": 9, "end": 10}, {"start": 13, "end": 14}],
+    "events": [{"type": "A", "h": 20.5}, {"type": "X", "h": 24}, {"type": "A", "h": 28}, {"type": "A", "h": 30.5}]
+  },
+  {
+    "date": "2026-06-05",
+    "sleeps": [{"start": 21, "end": 31}, {"start": 10, "end": 11}, {"start": 13, "end": 14}],
+    "events": [{"type": "A", "h": 20.5}, {"type": "A", "h": 27}, {"type": "X", "h": 30}, {"type": "A", "h": 31.5}]
+  },
+  {
+    "date": "2026-06-06",
+    "sleeps": [{"start": 22, "end": 32}, {"start": 10, "end": 11}, {"start": 14, "end": 15}],
+    "events": [{"type": "A", "h": 21.5}, {"type": "C", "h": 28}, {"type": "A", "h": 32.5}]
+  },
+  {
+    "date": "2026-06-07",
+    "sleeps": [{"start": 22, "end": 31}, {"start": 10, "end": 11}, {"start": 14, "end": 15}],
+    "events": [{"type": "A", "h": 21.5}, {"type": "A", "h": 27}, {"type": "X", "h": 30}, {"type": "A", "h": 31.5}]
+  }
+]

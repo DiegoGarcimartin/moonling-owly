@@ -15,6 +15,8 @@ import {
   StoredState, StoredNight,
 } from './storage'
 import { EventType, clockToTrack, fmtTrackMin } from './data'
+import { track, identifyUser, resetUser } from './lib/analytics'
+import { t as tr } from './lib/i18n'
 
 interface Settings {
   mode: 'night' | 'day'
@@ -80,11 +82,15 @@ export default function App() {
   const { mode, dayStart, childName, childAge } = settings
   const nights = stored.nights
 
+  // Entrada al embudo: el usuario ha abierto /app
+  useEffect(() => { track('app_opened') }, [])
+
   // Auth state — al login carga desde Firebase y mergea con localStorage
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser)
       if (firebaseUser) {
+        identifyUser(firebaseUser.uid)
         const remote = await loadAllNights(firebaseUser.uid)
         const local = load().nights
         const merged = mergeNights(remote, local)
@@ -97,6 +103,7 @@ export default function App() {
         }
       } else {
         setStored({ nights: [] })
+        resetUser()
       }
       setAuthLoading(false)
     })
@@ -146,13 +153,23 @@ export default function App() {
     return !!last && last.end === null
   }, [nights, dayStart])
 
+  const days = useMemo(() => nightsToDays(nights, dayStart), [nights, dayStart])
+
+  // Calendar-based night index: days elapsed since the first stored night,
+  // counting today even if no entry has been logged yet tonight.
+  const currentNight = useMemo(() => {
+    if (nights.length === 0) return 0
+    const firstDate = [...nights].sort((a, b) => a.date.localeCompare(b.date))[0].date
+    const todayStr = nightDate(dayStart)
+    const diffMs = new Date(todayStr + 'T12:00:00Z').getTime() - new Date(firstDate + 'T12:00:00Z').getTime()
+    return Math.round(diffMs / 86400000) + 1
+  }, [nights, dayStart])
+
   const appState = useMemo((): 'empty' | 'tracking' | 'complete' => {
     if (nights.length === 0) return 'empty'
-    if (nights.length >= 14 && !isSleeping) return 'complete'
+    if (currentNight >= 14 && !isSleeping) return 'complete'
     return 'tracking'
-  }, [nights.length, isSleeping])
-
-  const days = useMemo(() => nightsToDays(nights, dayStart), [nights, dayStart])
+  }, [nights.length, currentNight, isSleeping])
 
   const fmt12Short = (h: number) => {
     const m = Math.round((h % 1) * 60)
@@ -182,12 +199,18 @@ export default function App() {
     setStored({ nights: result })
     if (user) syncNight(night, user.uid)
 
-    popToast(isSleeping ? `↑ Despertar · ${timeStr}` : `↓ Inicio de sueño · ${timeStr}`)
+    // Evento clave del embudo: "empieza el procedimiento" = registra sueño.
+    // total_nights permite separar la 1ª noche (activación) del uso recurrente.
+    track('sleep_logged', { action: sleeping ? 'wake' : 'start', total_nights: result.length })
+
+    popToast(isSleeping ? tr.toastWake(timeStr) : tr.toastSleepStart(timeStr))
   }, [stored.nights, dayStart, isSleeping, popToast, user])
 
   const handleQuickEvent = useCallback((type: EventType) => {
     const h = nowClockHour()
-    const labels = { A: 'Toma', C: 'Colecho', X: 'Nota' } as const
+    // Stable analytics token (language-independent) vs localized display label.
+    const tokens = { A: 'feed', C: 'cosleep', X: 'note' } as const
+    const labels = { A: tr.feeding, C: tr.cosleep, X: tr.note } as const
 
     const { nights: updatedNights, idx } = getOrCreateTonight(stored.nights, dayStart)
     const night = {
@@ -199,7 +222,9 @@ export default function App() {
     setStored({ nights: result })
     if (user) syncNight(night, user.uid)
 
-    popToast(`${labels[type]} · ${fmt12Short(h)}`)
+    track('quick_event_logged', { type: tokens[type] })
+
+    popToast(tr.toastEvent(labels[type], fmt12Short(h)))
 
     // For 'Nota' we open the note editor immediately. A note with no text
     // is useless to the pediatrician — better to nudge the parent to say
@@ -243,7 +268,7 @@ export default function App() {
     nightsCopy[idx] = updatedNight
     setStored({ nights: nightsCopy })
     if (user) syncNight(updatedNight, user.uid)
-    popToast('Entrada eliminada')
+    popToast(tr.toastEntryDeleted)
   }, [stored.nights, dayStart, popToast, user])
 
   const handleManualSave = useCallback((entry: { type: string; hour: number; minute: number; dayOffset: number; note?: string }) => {
@@ -276,7 +301,7 @@ export default function App() {
     setStored({ nights: nightsCopy })
     if (user) syncNight(night, user.uid)
 
-    popToast('Entrada guardada')
+    popToast(tr.toastEntrySaved)
     setShowModal(false)
   }, [stored.nights, dayStart, popToast, user])
 
@@ -304,14 +329,14 @@ export default function App() {
     setStored({ nights: nightsCopy })
     if (user) syncNight(night, user.uid)
     setEditingEvent(null)
-    popToast('Nota guardada')
+    popToast(tr.toastNoteSaved)
   }, [editingEvent, stored.nights, dayStart, popToast, user])
 
   const handleClosePeriod = useCallback(() => {
     setShowCloseModal(false)
     setStored({ nights: [] })
     if (user) deleteAllNights(user.uid)
-    popToast('Diario cerrado · empezando de cero')
+    popToast(tr.toastDiaryClosed)
     setTab('home')
   }, [popToast, user])
 
@@ -343,9 +368,10 @@ export default function App() {
     return (
       <div className="app-root" data-mode={mode}>
         <OnboardingScreen
-          onDone={(childName, childAge) =>
+          onDone={(childName, childAge) => {
+            track('onboarding_completed', { has_age: !!childAge })
             patchSettings({ childName, childAge, onboardingDone: true })
-          }
+          }}
         />
       </div>
     )
@@ -360,7 +386,7 @@ export default function App() {
           <span className="serif-italic" style={{ opacity: 0.6 }}>Owly</span>
         </div>
         <div style={{ display: 'flex', gap: 6 }}>
-          <button className="iconbtn" onClick={() => patchSettings({ mode: mode === 'day' ? 'night' : 'day' })} aria-label="Toggle mode">
+          <button className="iconbtn" onClick={() => patchSettings({ mode: mode === 'day' ? 'night' : 'day' })} aria-label={tr.ariaToggleMode}>
             {mode === 'day' ? (
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <path d="M20 14.5A8 8 0 0 1 10 4.5 8 8 0 1 0 20 14.5Z" fill="currentColor"/>
@@ -372,7 +398,7 @@ export default function App() {
               </svg>
             )}
           </button>
-          <button className="iconbtn" onClick={() => setShowSettings(true)} aria-label="Ajustes">
+          <button className="iconbtn" onClick={() => setShowSettings(true)} aria-label={tr.ariaSettings}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="3"/>
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -382,8 +408,8 @@ export default function App() {
       </div>
 
       <div className="tabs">
-        <button className={`tab${tab === 'home' ? ' active' : ''}`} onClick={() => setTab('home')}>Hoy</button>
-        <button className={`tab${tab === 'sheet' ? ' active' : ''}`} onClick={() => setTab('sheet')}>Diario</button>
+        <button className={`tab${tab === 'home' ? ' active' : ''}`} onClick={() => setTab('home')}>{tr.tabToday}</button>
+        <button className={`tab${tab === 'sheet' ? ' active' : ''}`} onClick={() => setTab('sheet')}>{tr.tabDiary}</button>
       </div>
 
       <div className="screen">
@@ -393,6 +419,7 @@ export default function App() {
             state={appState}
             sleeping={isSleeping}
             dayStart={dayStart}
+            currentNight={currentNight}
             onSleepToggle={handleSleepToggle}
             onQuickEvent={handleQuickEvent}
             onManual={() => setShowModal(true)}
@@ -428,10 +455,10 @@ export default function App() {
         <div className="modal-back" onClick={(e) => { if ((e.target as HTMLElement).classList.contains('modal-back')) setShowCloseModal(false) }}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-handle" />
-            <h2 className="modal-title">¿Cerrar este diario?</h2>
-            <p className="modal-sub">Empezarás un diario nuevo desde la noche 1.</p>
-            <button className="modal-confirm" onClick={handleClosePeriod}>Sí, cerrar y empezar de cero</button>
-            <button className="modal-cancel" onClick={() => setShowCloseModal(false)}>Cancelar</button>
+            <h2 className="modal-title">{tr.closeDiaryTitle}</h2>
+            <p className="modal-sub">{tr.closeDiarySub}</p>
+            <button className="modal-confirm" onClick={handleClosePeriod}>{tr.closeDiaryConfirm}</button>
+            <button className="modal-cancel" onClick={() => setShowCloseModal(false)}>{tr.cancel}</button>
           </div>
         </div>
       )}
@@ -441,13 +468,13 @@ export default function App() {
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-handle" />
             <h2 className="modal-title">
-              {{ feeding: 'Toma', cosleep: 'Colecho', incident: 'Nota' }[editingEvent.kind]}
+              {{ feeding: tr.feeding, cosleep: tr.cosleep, incident: tr.note }[editingEvent.kind]}
               <span className="modal-title-sub"> · {fmtTrackMin(editingEvent.t, dayStart)}</span>
             </h2>
             <div className="entry-note-wrap">
               <textarea
                 className="entry-note"
-                placeholder="Ej: tomó 210 ml, tardó en dormirse…"
+                placeholder={tr.notePlaceholderExample}
                 value={editingEvent.note}
                 onChange={e => setEditingEvent(ev => ev ? { ...ev, note: e.target.value.slice(0, 140) } : null)}
                 rows={3}
@@ -457,8 +484,8 @@ export default function App() {
                 <span className="entry-note-count mono">{editingEvent.note.length}/140</span>
               )}
             </div>
-            <button className="modal-confirm" onClick={handleSaveEditNote}>Guardar</button>
-            <button className="modal-cancel" onClick={() => setEditingEvent(null)}>Cancelar</button>
+            <button className="modal-confirm" onClick={handleSaveEditNote}>{tr.save}</button>
+            <button className="modal-cancel" onClick={() => setEditingEvent(null)}>{tr.cancel}</button>
           </div>
         </div>
       )}

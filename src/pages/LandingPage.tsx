@@ -1,120 +1,46 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '../lib/firebase'
+import { useNavigate, Link } from 'react-router-dom'
 import { SheetGrid } from '../components/SheetGrid'
 import type { Day } from '../data'
+import { track } from '../lib/analytics'
+import { t, WEEKDAYS } from '../lib/i18n'
 
-// 8 nights of realistic demo data (dayStart = 19 = 7 PM)
+// Localized weekday abbreviation for a 2026-05-DD demo date.
+const demoWeekday = (day: number) =>
+  WEEKDAYS[new Date(`2026-05-${String(day).padStart(2, '0')}T12:00:00Z`).getUTCDay()]
+
+// 14 nights of realistic demo data (dayStart = 19 = 7 PM)
 // Track minutes: 0 = 7 PM · 60 = 8 PM · 300 = 12 AM · 540 = 4 AM · 720 = 7 AM
-const DEMO_DAYS: Day[] = [
-  { d: '12', label: 'LUN', date: '2026-05-12', sleeps: [[75,360],[375,600]],          events: [{ type: 'A', t: 362 }] },
-  { d: '13', label: 'MAR', date: '2026-05-13', sleeps: [[60,330],[345,420],[435,630]],events: [{ type: 'A', t: 330 }, { type: 'A', t: 420 }] },
-  { d: '14', label: 'MIÉ', date: '2026-05-14', sleeps: [[90,600]],                    events: [] },
-  { d: '15', label: 'JUE', date: '2026-05-15', sleeps: [[45,270],[330,540],[555,660]],events: [{ type: 'A', t: 270 }, { type: 'A', t: 330 }] },
-  { d: '16', label: 'VIE', date: '2026-05-16', sleeps: [[60,510],[525,690]],          events: [{ type: 'A', t: 510 }, { type: 'C', t: 525 }] },
-  { d: '17', label: 'SÁB', date: '2026-05-17', sleeps: [[75,465],[480,645]],          events: [{ type: 'A', t: 465 }] },
-  { d: '18', label: 'DOM', date: '2026-05-18', sleeps: [[60,660]],                    events: [] },
-  { d: '19', label: 'LUN', date: '2026-05-19', sleeps: [[75,390],[405,615]],          events: [{ type: 'A', t: 390 }] },
+const DEMO_DAYS_RAW: Day[] = [
+  { d: '12', label: '', date: '2026-05-12', sleeps: [[75,360],[375,600]],          events: [{ type: 'A', t: 362 }] },
+  { d: '13', label: '', date: '2026-05-13', sleeps: [[60,330],[345,420],[435,630]],events: [{ type: 'A', t: 330 }, { type: 'A', t: 420 }] },
+  { d: '14', label: '', date: '2026-05-14', sleeps: [[90,600]],                    events: [] },
+  { d: '15', label: '', date: '2026-05-15', sleeps: [[45,270],[330,540],[555,660]],events: [{ type: 'A', t: 270 }, { type: 'A', t: 330 }] },
+  { d: '16', label: '', date: '2026-05-16', sleeps: [[60,510],[525,690]],          events: [{ type: 'A', t: 510 }, { type: 'C', t: 525 }] },
+  { d: '17', label: '', date: '2026-05-17', sleeps: [[75,465],[480,645]],          events: [{ type: 'A', t: 465 }] },
+  { d: '18', label: '', date: '2026-05-18', sleeps: [[60,660]],                    events: [] },
+  { d: '19', label: '', date: '2026-05-19', sleeps: [[75,390],[405,615]],          events: [{ type: 'A', t: 390 }] },
+  { d: '20', label: '', date: '2026-05-20', sleeps: [[90,480],[495,660]],          events: [{ type: 'A', t: 480 }] },
+  { d: '21', label: '', date: '2026-05-21', sleeps: [[60,420],[435,630]],          events: [{ type: 'C', t: 435 }] },
+  { d: '22', label: '', date: '2026-05-22', sleeps: [[75,510]],                    events: [] },
+  { d: '23', label: '', date: '2026-05-23', sleeps: [[60,300],[330,510],[525,660]],events: [{ type: 'A', t: 300 }, { type: 'A', t: 330 }] },
+  { d: '24', label: '', date: '2026-05-24', sleeps: [[90,480],[510,660]],          events: [{ type: 'A', t: 480 }] },
+  { d: '25', label: '', date: '2026-05-25', sleeps: [[75,540]],                    events: [] },
 ]
-
-type LeadState = 'idle' | 'loading' | 'done' | 'error'
-
-function ContactForm() {
-  const [nombre, setNombre]   = useState('')
-  const [negocio, setNegocio] = useState('')
-  const [email, setEmail]     = useState('')
-  const [clientes, setClientes] = useState('')
-  const [mensaje, setMensaje] = useState('')
-  const [status, setStatus]   = useState<LeadState>('idle')
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!nombre.trim() || !email.trim()) return
-    setStatus('loading')
-    try {
-      await addDoc(collection(db, 'leads'), {
-        nombre:   nombre.trim(),
-        negocio:  negocio.trim(),
-        email:    email.trim(),
-        clientes,
-        mensaje:  mensaje.trim(),
-        createdAt: serverTimestamp(),
-      })
-      setStatus('done')
-    } catch {
-      setStatus('error')
-    }
-  }
-
-  if (status === 'done') {
-    return (
-      <div className="lp-form-done">
-        <div className="lp-form-done-icon">✓</div>
-        <p className="lp-form-done-msg">Recibido. Te escribimos pronto.</p>
-      </div>
-    )
-  }
-
-  return (
-    <form className="lp-form" onSubmit={submit}>
-      <div className="lp-form-row">
-        <div className="lp-form-field">
-          <label className="lp-form-label">Nombre *</label>
-          <input className="lp-form-input" type="text" value={nombre}
-            onChange={e => setNombre(e.target.value)} placeholder="Tu nombre" required />
-        </div>
-        <div className="lp-form-field">
-          <label className="lp-form-label">Consulta o negocio *</label>
-          <input className="lp-form-input" type="text" value={negocio}
-            onChange={e => setNegocio(e.target.value)} placeholder="Ej. Sueño Feliz" required />
-        </div>
-      </div>
-      <div className="lp-form-row">
-        <div className="lp-form-field">
-          <label className="lp-form-label">Email de contacto *</label>
-          <input className="lp-form-input" type="email" value={email}
-            onChange={e => setEmail(e.target.value)} placeholder="hola@tuconsulta.com" required />
-        </div>
-        <div className="lp-form-field">
-          <label className="lp-form-label">Número de clientes aprox.</label>
-          <select className="lp-form-select" value={clientes} onChange={e => setClientes(e.target.value)}>
-            <option value="">Seleccionar</option>
-            <option value="<10">Menos de 10</option>
-            <option value="10-50">10 – 50</option>
-            <option value="50-200">50 – 200</option>
-            <option value="+200">Más de 200</option>
-          </select>
-        </div>
-      </div>
-      <div className="lp-form-field">
-        <label className="lp-form-label">Mensaje (opcional)</label>
-        <textarea className="lp-form-textarea" value={mensaje} rows={3}
-          onChange={e => setMensaje(e.target.value)}
-          placeholder="Cuéntanos un poco sobre lo que buscas…" />
-      </div>
-      <button className="lp-form-submit" type="submit" disabled={status === 'loading'}>
-        {status === 'loading' ? 'Enviando…' : 'Enviar'}
-      </button>
-      {status === 'error' && (
-        <p className="lp-form-error">Algo salió mal. Escríbenos a hola@moonlingowly.com</p>
-      )}
-    </form>
-  )
-}
+const DEMO_DAYS: Day[] = DEMO_DAYS_RAW.map(d => ({ ...d, label: demoWeekday(parseInt(d.d)) }))
 
 // Nights for the actogram demo (track minutes from dayStart=19 / 7 PM)
 // 0 = 7 PM · 60 = 8 PM · 300 = 12 AM · 540 = 4 AM · 720 = 7 AM
 const ACTO_NIGHTS = [
-  { label: 'L 12', sleeps: [[75,360],[375,600]] as [number,number][] },
-  { label: 'M 13', sleeps: [[60,330],[345,420],[435,630]] as [number,number][] },
-  { label: 'X 14', sleeps: [[90,600]] as [number,number][] },
-  { label: 'J 15', sleeps: [[45,270],[330,540],[555,660]] as [number,number][] },
-  { label: 'V 16', sleeps: [[60,510],[525,690]] as [number,number][] },
-  { label: 'S 17', sleeps: [[75,465],[480,645]] as [number,number][] },
-  { label: 'D 18', sleeps: [[60,660]] as [number,number][] },
-  { label: 'L 19', sleeps: [[75,390],[405,615]] as [number,number][] },
-]
+  { day: 12, sleeps: [[75,360],[375,600]] as [number,number][] },
+  { day: 13, sleeps: [[60,330],[345,420],[435,630]] as [number,number][] },
+  { day: 14, sleeps: [[90,600]] as [number,number][] },
+  { day: 15, sleeps: [[45,270],[330,540],[555,660]] as [number,number][] },
+  { day: 16, sleeps: [[60,510],[525,690]] as [number,number][] },
+  { day: 17, sleeps: [[75,465],[480,645]] as [number,number][] },
+  { day: 18, sleeps: [[60,660]] as [number,number][] },
+  { day: 19, sleeps: [[75,390],[405,615]] as [number,number][] },
+].map(n => ({ ...n, label: `${demoWeekday(n.day)[0].toUpperCase()} ${n.day}` }))
 
 // Phases: awake → tap → toast → sleeping → tap → toast → event log → slide → actogram
 const DP = [
@@ -151,7 +77,7 @@ function AnimatedPhone() {
   const isToast  = phase === 'toast_s' || phase === 'toast_w'
   const isDiary  = phase === 'swipe' || phase === 'diary'
   const events   = phase === 'logged'
-  const toast    = phase === 'toast_s' ? '↓  Inicio de sueño · 8:15 PM' : '↑  Despertar · 11:42 PM'
+  const toast    = phase === 'toast_s' ? t.dpToastSleep : t.dpToastWake
 
   return (
     <div className="dp-frame">
@@ -161,13 +87,13 @@ function AnimatedPhone() {
       {/* header */}
       <div className="dp-topbar">
         <span className="dp-brand">Moonling <em>Owly</em></span>
-        <span className="dp-meta">noche <b>8</b> / 14</span>
+        <span className="dp-meta">{t.dayCounter(8).pre}<b>8</b>{t.dayCounter(8).post}</span>
       </div>
 
       {/* tabs */}
       <div className="dp-tabs">
-        <span className={`dp-tab${!isDiary ? ' active' : ''}`}>Hoy</span>
-        <span className={`dp-tab${isDiary ? ' active' : ''}`}>Diario</span>
+        <span className={`dp-tab${!isDiary ? ' active' : ''}`}>{t.tabToday}</span>
+        <span className={`dp-tab${isDiary ? ' active' : ''}`}>{t.tabDiary}</span>
       </div>
 
       {/* screens */}
@@ -177,33 +103,33 @@ function AnimatedPhone() {
         <div className={`dp-home${isDiary ? ' dp-home--out' : ''}`}>
           <div className="dp-status">
             <span className={`dp-dot ${sleeping ? 'sleeping' : 'awake'}`} />
-            <span className="dp-status-text">{sleeping ? 'Durmiendo' : 'Despierto'}</span>
-            {sleeping && <span className="dp-since">desde las 8:15 PM</span>}
+            <span className="dp-status-text">{sleeping ? t.sleeping : t.awake}</span>
+            {sleeping && <span className="dp-since">{t.dpSince815}</span>}
           </div>
 
           <div className={`dp-cta${sleeping ? ' sleeping' : ''}${tapping ? ' pressing' : ''}`}>
             <div className="dp-cta-body">
-              <div className="dp-eyebrow">{sleeping ? 'cuando se despierte' : 'cuando empiece el sueño'}</div>
-              <div className="dp-label">{sleeping ? 'Marcar despertar' : 'Inicio de sueño'}</div>
+              <div className="dp-eyebrow">{sleeping ? t.ctaEyebrowWake : t.ctaEyebrowSleep}</div>
+              <div className="dp-label">{sleeping ? t.ctaWake : t.ctaStart}</div>
             </div>
             <div className="dp-arrow">{sleeping ? '↑' : '↓'}</div>
           </div>
 
           <div className="dp-sec">
-            <span className="dp-sec-item">Toma</span>
-            <span className="dp-sec-item">Colecho</span>
-            <span className="dp-sec-item">Nota</span>
+            <span className="dp-sec-item">{t.feeding}</span>
+            <span className="dp-sec-item">{t.cosleep}</span>
+            <span className="dp-sec-item">{t.note}</span>
           </div>
 
           {events ? (
             <div className="dp-events">
               <div className="dp-ev">
                 <span className="dp-ev-time">8:15 PM</span>
-                <span className="dp-ev-lbl">↓ Inicio de sueño</span>
+                <span className="dp-ev-lbl">↓ {t.sleepStart}</span>
               </div>
               <div className="dp-ev">
                 <span className="dp-ev-time">11:42 PM</span>
-                <span className="dp-ev-lbl">↑ Despertar</span>
+                <span className="dp-ev-lbl">↑ {t.sleepEnd}</span>
               </div>
             </div>
           ) : (
@@ -216,7 +142,7 @@ function AnimatedPhone() {
 
         {/* DIARY */}
         <div className={`dp-diary${isDiary ? ' dp-diary--in' : ''}`}>
-          <div className="dp-diary-label">8 noches · diario listo</div>
+          <div className="dp-diary-label">{t.lpDiaryReady(8)}</div>
           <div className="dp-acto">
             {ACTO_NIGHTS.map((n, i) => (
               <div key={i} className="dp-acto-row">
@@ -254,6 +180,11 @@ function AnimatedPhone() {
 export function LandingPage() {
   const navigate = useNavigate()
 
+  const goToApp = (cta: 'nav' | 'hero' | 'manifesto') => {
+    track('landing_cta_click', { cta })
+    navigate('/app')
+  }
+
   // Force day appearance and reset phone-frame layout while landing is visible
   useEffect(() => {
     document.documentElement.setAttribute('data-mode', 'day')
@@ -269,26 +200,25 @@ export function LandingPage() {
         <span className="lp-nav-brand">
           Moonling <em className="serif-italic">Owly</em>
         </span>
-        <button className="lp-nav-cta" onClick={() => navigate('/app')}>
-          Abrir app →
+        <button className="lp-nav-cta" onClick={() => goToApp('nav')}>
+          {t.openApp}
         </button>
       </nav>
 
-      {/* ── Hero — para los padres ────────────────────────────── */}
+      {/* ── Hero ─────────────────────────────────────────────── */}
       <section className="lp-hero">
         <div className="lp-hero-inner">
           <div className="lp-hero-text">
-            <p className="lp-eyebrow">diario de sueño</p>
+            <p className="lp-eyebrow">{t.lpEyebrow}</p>
             <h1 className="lp-hero-title">
-              El diario de sueño<br />
-              para las 3 de la mañana.
+              {t.lpHeroTitle1}<br />
+              {t.lpHeroTitle2}
             </h1>
             <p className="lp-hero-sub">
-              Un toque cuando empieza el sueño. Un toque cuando se despierta.
-              En 14 noches tienes un diario listo para tu pediatra.
+              {t.lpHeroSub}
             </p>
-            <button className="lp-hero-cta" onClick={() => navigate('/app')}>
-              Empezar gratis
+            <button className="lp-hero-cta" onClick={() => goToApp('hero')}>
+              {t.lpHeroCta}
             </button>
           </div>
           <div className="lp-hero-visual">
@@ -297,40 +227,22 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Grid demo — para consultoras ─────────────────────── */}
+      {/* ── El resultado — para padres ───────────────────────── */}
       <section className="lp-section lp-section--light">
         <div className="lp-inner">
-          <p className="lp-section-label">para consultoras de sueño</p>
+          <p className="lp-section-label">{t.lpResultLabel}</p>
           <h2 className="lp-section-title">
-            El actograma que necesitas,<br />
-            <em className="serif-italic">sin trabajo extra.</em>
+            {t.lpResultTitle}
           </h2>
           <p className="lp-section-body">
-            Tus clientes registran noche a noche. Tú recibes el patrón visual
-            completo antes de cada sesión — listo para compartir o imprimir.
+            {t.lpResultBody}
           </p>
           <div className="lp-grid-wrap">
             <div className="lp-grid-demo">
               <SheetGrid days={DEMO_DAYS} dayStart={19} print={true} />
             </div>
-            <p className="lp-grid-caption">8 noches de ejemplo · inicio a las 7 PM</p>
+            <p className="lp-grid-caption">{t.lpResultCaption}</p>
           </div>
-        </div>
-      </section>
-
-      {/* ── White label ──────────────────────────────────────── */}
-      <section className="lp-section lp-section--warm">
-        <div className="lp-inner">
-          <p className="lp-section-label">white label</p>
-          <h2 className="lp-section-title">
-            Tu marca.<br />
-            <em className="serif-italic">Tu herramienta.</em>
-          </h2>
-          <p className="lp-section-body">
-            Logo, colores, nombre. La app queda como tuya.
-            Tus clientes la instalan en el móvil sin saber que existe Moonling Owly.
-          </p>
-          <ContactForm />
         </div>
       </section>
 
@@ -338,17 +250,17 @@ export function LandingPage() {
       <section className="lp-section lp-section--dark">
         <div className="lp-inner">
           <h2 className="lp-manifesto-title">
-            Esto es un diario.<br />
-            <em className="serif-italic">Nada más.</em>
+            {t.lpManifestoTitle1}<br />
+            <em className="serif-italic">{t.lpManifestoTitle2}</em>
           </h2>
           <ul className="lp-manifesto-list">
-            <li>No predice ni analiza el sueño de tu hijo.</li>
-            <li>No te manda notificaciones a las 3 AM.</li>
-            <li>No tiene IA que te diga qué estás haciendo mal.</li>
-            <li>No vende publicidad ni tiene versión premium.</li>
+            <li>{t.lpManifesto1}</li>
+            <li>{t.lpManifesto2}</li>
+            <li>{t.lpManifesto3}</li>
+            <li>{t.lpManifesto4}</li>
           </ul>
-          <button className="lp-manifesto-cta" onClick={() => navigate('/app')}>
-            Probar →
+          <button className="lp-manifesto-cta" onClick={() => goToApp('manifesto')}>
+            {t.lpManifestoCta}
           </button>
         </div>
       </section>
@@ -356,7 +268,12 @@ export function LandingPage() {
       {/* ── Footer ──────────────────────────────────────────── */}
       <footer className="lp-footer">
         <span>Moonling <em className="serif-italic">Owly</em></span>
-        <span className="lp-footer-v">v 0.1</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <Link to="/profesionales" className="lp-footer-pro">
+            {t.lpFooterPro}
+          </Link>
+          <span className="lp-footer-v">v 0.1</span>
+        </div>
       </footer>
 
     </div>

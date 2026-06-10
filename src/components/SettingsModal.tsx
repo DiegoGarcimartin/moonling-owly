@@ -1,4 +1,5 @@
 import { Icon } from './Icon'
+import { t } from '../lib/i18n'
 
 const sanitize = (s: string) => s.replace(/[<>]/g, '')
 
@@ -36,59 +37,59 @@ export function SettingsModal({ settings, onChange, onNewJournal, onSignOut, onC
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-handle" />
         <div className="settings-head">
-          <h2 className="modal-title">Ajustes</h2>
-          <button className="iconbtn" onClick={onClose} aria-label="Cerrar" style={{ flexShrink: 0 }}>
+          <h2 className="modal-title">{t.settings}</h2>
+          <button className="iconbtn" onClick={onClose} aria-label={t.ariaClose} style={{ flexShrink: 0 }}>
             <Icon name="close" size={16}/>
           </button>
         </div>
 
         <div className="settings-section">
-          <div className="settings-label">Bebé</div>
+          <div className="settings-label">{t.baby}</div>
           <div className="settings-field">
-            <label>Nombre</label>
+            <label>{t.name}</label>
             <input
               type="text"
               className="settings-input"
               value={settings.childName}
               onChange={(e) => onChange({ childName: sanitize(e.target.value).slice(0, 40) })}
               maxLength={40}
-              placeholder="ej. Lila"
+              placeholder={t.egName}
             />
           </div>
           <div className="settings-field">
-            <label>Edad</label>
+            <label>{t.age}</label>
             <input
               type="text"
               className="settings-input"
               value={settings.childAge}
               onChange={(e) => onChange({ childAge: sanitize(e.target.value).slice(0, 16) })}
               maxLength={16}
-              placeholder="ej. 11 m"
+              placeholder={t.egAge}
             />
           </div>
-          <div className="settings-hint">Se muestra en el diario que compartes con tu pediatra.</div>
+          <div className="settings-hint">{t.nameHint}</div>
         </div>
 
         <div className="settings-section">
-          <div className="settings-label">La noche empieza a las</div>
+          <div className="settings-label">{t.dayStartsAt}</div>
           <div className="settings-stepper">
-            <button className="settings-step-btn" onClick={() => stepDayStart(-1)} aria-label="Antes">−</button>
+            <button className="settings-step-btn" onClick={() => stepDayStart(-1)} aria-label={t.ariaEarlier}>−</button>
             <div className="settings-step-value">
               <span className="settings-step-num">{hh}</span>
               <span className="settings-step-period mono">{period}</span>
             </div>
-            <button className="settings-step-btn" onClick={() => stepDayStart(1)} aria-label="Después">+</button>
+            <button className="settings-step-btn" onClick={() => stepDayStart(1)} aria-label={t.ariaLater}>+</button>
           </div>
-          <div className="settings-hint">Si tu familia empieza antes o después, puedes ajustarlo.</div>
+          <div className="settings-hint">{t.dayStartHint}</div>
         </div>
 
         <div className="settings-section danger">
-          <button className="settings-danger-btn" onClick={onNewJournal}>Empezar un diario nuevo</button>
-          <div className="settings-hint">Cierra este período de 14 noches y empieza desde la noche 1. El diario actual se conserva.</div>
+          <button className="settings-danger-btn" onClick={onNewJournal}>{t.startNewJournal}</button>
+          <div className="settings-hint">{t.startNewJournalHint}</div>
         </div>
 
         <div className="settings-section">
-          <button className="settings-signout-btn" onClick={onSignOut}>Cerrar sesión</button>
+          <button className="settings-signout-btn" onClick={onSignOut}>{t.signOut}</button>
         </div>
 
         <div className="settings-foot">
