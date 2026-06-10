@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /$
+Allow: /profesionales
+Disallow: /app
+Disallow: /diary-preview
+
+Sitemap: https://moonling-owly.pages.dev/sitemap.xml

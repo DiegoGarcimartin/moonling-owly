@@ -260,6 +260,12 @@ const es = {
   formError: 'Algo salió mal. Escríbenos a hola@moonlingowly.com',
   formDone: 'Recibido. Te escribimos pronto.',
 
+  // ── Error boundary ─────────────────────────────────────────
+  errorTitle: 'Algo se ha torcido.',
+  errorBody: 'La app no ha podido cargarse. Si recargar no funciona, puedes empezar de cero (se borrarán los datos locales; si tenías sesión activa, los recuperarás al volver a entrar).',
+  errorReload: 'Recargar',
+  errorReset: 'Borrar datos locales y empezar',
+
   // ── Document meta ──────────────────────────────────────────
   docTitle: 'Moonling Owly — Diario de sueño para tu bebé',
   docDescription: 'El diario de sueño más sencillo. Un toque cuando empieza, un toque cuando termina. En 14 noches, un actograma listo para tu pediatra.',
@@ -482,6 +488,12 @@ const en: typeof es = {
   formSubmit: 'Send',
   formError: 'Something went wrong. Email us at hola@moonlingowly.com',
   formDone: 'Got it. We’ll be in touch soon.',
+
+  // ── Error boundary ─────────────────────────────────────────
+  errorTitle: 'Something went wrong.',
+  errorBody: 'The app couldn’t load. If reloading doesn’t help, you can start fresh (local data will be erased; if you were signed in, you’ll get it back when you log in again).',
+  errorReload: 'Reload',
+  errorReset: 'Erase local data and start over',
 
   // ── Document meta ──────────────────────────────────────────
   docTitle: 'Moonling Owly — Sleep diary for your baby',

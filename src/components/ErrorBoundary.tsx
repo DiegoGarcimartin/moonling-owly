@@ -1,4 +1,5 @@
 import { Component, ReactNode } from 'react'
+import { t } from '../lib/i18n'
 
 interface Props {
   children: ReactNode
@@ -42,18 +43,16 @@ export class ErrorBoundary extends Component<Props, State> {
           justifyContent: 'center', height: '100%', padding: '0 28px', textAlign: 'center', gap: 16,
         }}>
           <div className="serif-italic" style={{ fontSize: 28, color: 'var(--text)' }}>
-            Algo se ha torcido.
+            {t.errorTitle}
           </div>
           <p style={{ fontSize: 14, color: 'var(--text-mute)', maxWidth: 320, lineHeight: 1.5 }}>
-            La app no ha podido cargarse. Si recargar no funciona, puedes empezar
-            de cero (se borrarán los datos locales; si tenías sesión activa, los
-            recuperarás al volver a entrar).
+            {t.errorBody}
           </p>
           <button className="modal-confirm" onClick={this.handleReload} style={{ minWidth: 220 }}>
-            Recargar
+            {t.errorReload}
           </button>
           <button className="modal-cancel" onClick={this.handleReset} style={{ minWidth: 220 }}>
-            Borrar datos locales y empezar
+            {t.errorReset}
           </button>
         </div>
       </div>
