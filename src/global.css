@@ -1271,6 +1271,19 @@ html, body, #root {
 .lp-footer-v { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
 .lp-footer-pro { font-size: 11px; opacity: 0.45; color: inherit; text-decoration: none; transition: opacity 0.15s; }
 .lp-footer-pro:hover { opacity: 0.75; }
+
+/* ── Language toggle (ES / EN) ───────────────────────────────────────────── */
+.lang-toggle { display: inline-flex; align-items: center; }
+.lang-toggle-btn {
+  background: none; border: none; cursor: pointer; padding: 2px 4px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.06em;
+  color: inherit; opacity: 0.4; transition: opacity 0.15s ease, color 0.15s ease;
+}
+.lang-toggle-btn:hover { opacity: 0.7; }
+.lang-toggle-btn.active { opacity: 1; font-weight: 700; color: var(--accent); }
+.lang-toggle-sep { opacity: 0.3; font-size: 11px; padding: 0 1px; }
+.lang-toggle--settings .lang-toggle-btn { font-size: 13px; padding: 4px 10px; }
+.lang-toggle--settings .lang-toggle-sep { font-size: 13px; }
 .onboarding-cta:active { transform: scale(0.98); }
 
 /* ── Demo Phone — landing hero ───────────────────────────────────────────── */

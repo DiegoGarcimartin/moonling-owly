@@ -1,5 +1,6 @@
 import { Icon } from './Icon'
 import { t } from '../lib/i18n'
+import { LangToggle } from './LangToggle'
 
 const sanitize = (s: string) => s.replace(/[<>]/g, '')
 
@@ -81,6 +82,11 @@ export function SettingsModal({ settings, onChange, onNewJournal, onSignOut, onC
             <button className="settings-step-btn" onClick={() => stepDayStart(1)} aria-label={t.ariaLater}>+</button>
           </div>
           <div className="settings-hint">{t.dayStartHint}</div>
+        </div>
+
+        <div className="settings-section">
+          <div className="settings-label">{t.language}</div>
+          <LangToggle className="lang-toggle--settings" />
         </div>
 
         <div className="settings-section danger">

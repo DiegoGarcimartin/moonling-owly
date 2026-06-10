@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { SheetGrid } from '../components/SheetGrid'
+import { LangToggle } from '../components/LangToggle'
 import type { Day } from '../data'
 import { track } from '../lib/analytics'
 import { t, WEEKDAYS } from '../lib/i18n'
@@ -272,6 +273,7 @@ export function LandingPage() {
           <Link to="/profesionales" className="lp-footer-pro">
             {t.lpFooterPro}
           </Link>
+          <LangToggle />
           <span className="lp-footer-v">v 0.1</span>
         </div>
       </footer>

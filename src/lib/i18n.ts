@@ -5,6 +5,9 @@
 
 export type Lang = 'es' | 'en'
 
+const LANG_KEY = 'moonling-owly-lang'
+
+// Auto-detect from the browser locale: Spanish locales → 'es', else 'en'.
 export function detectLang(): Lang {
   try {
     const candidates = [
@@ -18,7 +21,28 @@ export function detectLang(): Lang {
   }
 }
 
-export const lang: Lang = detectLang()
+// A manual choice (if any) wins over the auto-detected locale.
+function storedLang(): Lang | null {
+  try {
+    const v = localStorage.getItem(LANG_KEY)
+    return v === 'es' || v === 'en' ? v : null
+  } catch {
+    return null
+  }
+}
+
+export const lang: Lang = storedLang() ?? detectLang()
+
+// Whether the active language came from an explicit user choice.
+export const langIsManual = storedLang() !== null
+
+// Persist a manual language choice and reload so every statically-resolved
+// `t.*` string is recomputed in the new language.
+export function setLang(next: Lang) {
+  if (next === lang) return
+  try { localStorage.setItem(LANG_KEY, next) } catch { /* ignore */ }
+  window.location.reload()
+}
 
 // Month + weekday abbreviations, indexed the JS way (months 0..11,
 // weekdays 0=Sun..6=Sat).
@@ -178,6 +202,7 @@ const es = {
   startNewJournal: 'Empezar un diario nuevo',
   startNewJournalHint: 'Cierra este período de 14 días y empieza desde el día 1. El diario actual se conserva.',
   signOut: 'Cerrar sesión',
+  language: 'Idioma',
 
   // ── Help modal ─────────────────────────────────────────────
   helpSub: 'Unas pocas reglas. Nada más.',
@@ -407,6 +432,7 @@ const en: typeof es = {
   startNewJournal: 'Start a new diary',
   startNewJournalHint: 'Closes this 14-day period and starts from day 1. The current diary is kept.',
   signOut: 'Sign out',
+  language: 'Language',
 
   // ── Help modal ─────────────────────────────────────────────
   helpSub: 'A few rules. Nothing more.',

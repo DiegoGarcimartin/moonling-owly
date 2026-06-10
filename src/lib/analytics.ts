@@ -9,7 +9,11 @@ import posthog from 'posthog-js'
 // Si no hay clave configurada (dev local sin .env) todo queda en no-op:
 // el flag `enabled` corta cualquier llamada para que nada reviente.
 
-const KEY = import.meta.env.VITE_POSTHOG_KEY as string | undefined
+// La Project API Key de PostHog es publicable (client-side, write-only): es
+// seguro tenerla en el bundle. Se puede sobreescribir con VITE_POSTHOG_KEY.
+const DEFAULT_KEY = 'phc_pTXAEKprxu7TiUcVqo7ULJeNk8fBfdcx4Q4XeGSapDv4'
+
+const KEY = (import.meta.env.VITE_POSTHOG_KEY as string | undefined) || DEFAULT_KEY
 const HOST = (import.meta.env.VITE_POSTHOG_HOST as string | undefined) ?? 'https://eu.i.posthog.com'
 
 let enabled = false

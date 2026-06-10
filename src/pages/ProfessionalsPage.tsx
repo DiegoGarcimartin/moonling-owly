@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { t } from '../lib/i18n'
+import { LangToggle } from '../components/LangToggle'
 
 type LeadState = 'idle' | 'loading' | 'done' | 'error'
 
@@ -128,7 +129,10 @@ export function ProfessionalsPage() {
         >
           {t.back}
         </span>
-        <span className="lp-footer-v">v 0.1</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <LangToggle />
+          <span className="lp-footer-v">v 0.1</span>
+        </div>
       </footer>
 
     </div>
