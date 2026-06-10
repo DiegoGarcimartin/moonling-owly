@@ -13,8 +13,12 @@ import posthog from 'posthog-js'
 // seguro tenerla en el bundle. Se puede sobreescribir con VITE_POSTHOG_KEY.
 const DEFAULT_KEY = 'phc_pTXAEKprxu7TiUcVqo7ULJeNk8fBfdcx4Q4XeGSapDv4'
 
+// Importante: usar `||` (no `??`) para que una env var vacía ("" — p.ej. un
+// secret de GitHub inexistente que se expande a cadena vacía en el build) caiga
+// al valor por defecto. Con `??` la cadena vacía pasaría y api_host quedaría ""
+// → PostHog mandaría los eventos al propio origen y devolverían 405.
 const KEY = (import.meta.env.VITE_POSTHOG_KEY as string | undefined) || DEFAULT_KEY
-const HOST = (import.meta.env.VITE_POSTHOG_HOST as string | undefined) ?? 'https://eu.i.posthog.com'
+const HOST = (import.meta.env.VITE_POSTHOG_HOST as string | undefined) || 'https://eu.i.posthog.com'
 
 let enabled = false
 
